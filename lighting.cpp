@@ -49,7 +49,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		params.MultiSampleType = D3DMULTISAMPLE_NONE;
 
 	D3D::GraphicDevice graphicDevice( mainWindow.GetHWND(), params );
-	graphicDevice.SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
+	//graphicDevice.SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 	graphicDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
 	Helper::SpectatorCoords spectatorCoords( 40.0f, D3DX_PI / 2, -D3DX_PI / 2 );

@@ -25,8 +25,9 @@ typedef std::vector<Index> Indices;
 
 static const D3DVERTEXELEMENT9 DefaultVertexDeclaration[] =  {
 		{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
-		{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
-		{0, 16, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
+		{0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0},
+		{0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
+		{0, 28, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
 		D3DDECL_END()
 	};
 
@@ -36,6 +37,7 @@ void InitVertices(	Vertices& vertices, Indices& indices,
 {
 	const float angleStep = 2*D3DX_PI / nPointsPerCircle;
 	const float heightStep = height / (nPointsPerGeneratrix-1);
+	const D3DCOLOR color = D3DCOLOR_XRGB(200, 175, 85);
 
 	float h = 0;
 	for( unsigned i = 0; i<nPointsPerGeneratrix; ++i )
@@ -43,10 +45,9 @@ void InitVertices(	Vertices& vertices, Indices& indices,
 		float angle = 0;
 		for( unsigned j = 0; j<nPointsPerCircle; ++j )
 		{
-			vertices.push_back( Vertex(	R*cosf(angle),
-										h,
-										R*sinf(angle),
-										Colors::Random(),
+			vertices.push_back( Vertex(	R*cosf(angle), h, R*sinf(angle),
+										cosf(angle), 0, sinf(angle),
+										color,
 										h/height,
 										1-h/height) );
 			angle += angleStep;
@@ -96,6 +97,7 @@ void Cylinder::Draw()
 {
 	float time = static_cast<float>(clock()) / CLOCKS_PER_SEC;
 	float angle = (sinf(freq_*time * (2*D3DX_PI)) + 1)/2 * maxAngle_;
+
 	vertexBuffer_.Use(0,0);
 	indexBuffer_.Use();
 	vertexDeclaration_.Use();
@@ -103,6 +105,8 @@ void Cylinder::Draw()
 	shader_.SetMatrix( projectiveMatrix_*viewMatrix_*positionMatrix_, 0 );
 	shader_.SetMatrix( RotateZMatrix( angle ), 4 );
 	shader_.SetMatrix( UnityMatrix(), 8);
+	D3DXCOLOR color = Colors::Red;
+	shader_.SetConstantF(12, color, 1);
 	vertexDeclaration_.Use();
 
 	device_->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, nVertices_, 0, nPrimitives_);

@@ -37,12 +37,17 @@ private:
 
 struct Cylinder::Vertex
 {
-	float x, y, z;
+	D3DXVECTOR3 position;
+	D3DXVECTOR3 normal;
 	DWORD color;
 	float weight1;
 	float weight2;
 
 	Vertex() {};
-	Vertex( float x, float y, float z, DWORD color, float weight1, float weight2)
-		:x(x), y(y), z(z), color(color), weight1(weight1), weight2(weight2) {}
+	Vertex( float rx, float ry, float rz,
+			float nx, float ny, float nz,
+			DWORD color, float weight1, float weight2)
+		:position(rx, ry, rz),
+		 normal(nx, ny, nz) ,
+		 color(color), weight1(weight1), weight2(weight2) {}
 };
