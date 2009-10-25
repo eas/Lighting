@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <d3dx9.h>
+#include "light.h"
 
 
 
@@ -13,8 +14,9 @@ public:
 
 	Cylinder( unsigned nPointsPerCircle, unsigned nPointsPerGeneratrix,
 			  float height, float R,
-			  D3D::GraphicDevice& device, float freq, float maxAngle );
-	void Draw();
+			  D3D::GraphicDevice& device, float freq, float maxAngle,
+		      D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular );
+	void Draw(const Lights& lights);
 	void SetPositionMatrix(const D3DXMATRIX& positionMatrix);
 	void SetViewMatrix(const D3DXMATRIX& viewMatrix);
 	void SetProjectiveMatrix(const D3DXMATRIX& projectionMatrix);
@@ -32,22 +34,21 @@ private:
 	unsigned nPrimitives_;
 	const float freq_;
 	const float maxAngle_;
-	//vertexDeclaration.Use();
+	Material material_;
 };
 
 struct Cylinder::Vertex
 {
 	D3DXVECTOR3 position;
 	D3DXVECTOR3 normal;
-	DWORD color;
 	float weight1;
 	float weight2;
 
 	Vertex() {};
 	Vertex( float rx, float ry, float rz,
 			float nx, float ny, float nz,
-			DWORD color, float weight1, float weight2)
+			float weight1, float weight2)
 		:position(rx, ry, rz),
-		 normal(nx, ny, nz) ,
-		 color(color), weight1(weight1), weight2(weight2) {}
+		 normal(nx, ny, nz),
+		 weight1(weight1), weight2(weight2) {}
 };

@@ -7,6 +7,8 @@
 #include "matrices.h"
 
 #include "cylinder.h"
+#include "light.h"
+
 #ifndef NDEBUG
 	#define new new( _CLIENT_BLOCK, __FILE__, __LINE__)
 #endif
@@ -23,10 +25,10 @@ const float MaxAngle = D3DX_PI / 4;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
-			Cylinder& cylinder)
+			Cylinder& cylinder, const Lights& lights)
 {
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
-	cylinder.Draw();
+	cylinder.Draw(lights);
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -36,7 +38,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
 { // code block
 	Helper::Window mainWindow(	hInstance, nCmdShow, &WndProc,
-								L"Lighting", L"lighting", 2 );
+								L"Lighting", L"lighting", 3 );
 
 	D3DPRESENT_PARAMETERS params;
 		ZeroMemory( &params, sizeof( params ) );
@@ -53,17 +55,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	graphicDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
 	Helper::SpectatorCoords spectatorCoords( 40.0f, D3DX_PI / 2, -D3DX_PI / 2 );
-	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, Freq, MaxAngle);
+
+	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, Freq, MaxAngle,
+					  Colors::White, Colors::Black, Colors::White, Colors::White);
 	cylinder.SetPositionMatrix( RotateZMatrix(D3DX_PI/2)*TranslationMatrix(0, -Height/2*0, 0) );
+	cylinder.SetPositionMatrix( UnityMatrix() );
 	cylinder.SetViewMatrix( ViewMatrix( spectatorCoords.GetCartesianCoords(),
 										D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 										D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
 	cylinder.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
 
-
+	D3DXCOLOR ambient = Colors::Black;
+	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, 1.0f),
+									   Colors::Red,
+									   Colors::Black );
+	Lights lights(ambient, directionalLight);
+	lights.SetEye( spectatorCoords.GetCartesianCoords() );
 
 	SetWindowLong(mainWindow.GetHWND(), 0, reinterpret_cast<LONG>(&spectatorCoords));
 	SetWindowLong(mainWindow.GetHWND(), sizeof(LONG), reinterpret_cast<LONG>(&cylinder));
+	SetWindowLong(mainWindow.GetHWND(), 2*sizeof(LONG), reinterpret_cast<LONG>(&lights));
 
 	MSG msg;
 
@@ -77,7 +88,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         }
         else
 		{
-			Render(graphicDevice, spectatorCoords, cylinder);
+			Render(graphicDevice, spectatorCoords, cylinder, lights);
 		}
     }
 } // code block
@@ -96,9 +107,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			Helper::SpectatorCoords* pSpectatorCoords = NULL;
 			Cylinder* cylinder = NULL;
+			Lights* lights = NULL;
 			pSpectatorCoords = reinterpret_cast<Helper::SpectatorCoords*>(
 												GetWindowLong(hWnd, 0));
 			cylinder = reinterpret_cast<Cylinder*>( GetWindowLong(hWnd,sizeof(LONG)) );
+			lights = reinterpret_cast<Lights*>( GetWindowLong(hWnd, 2*sizeof(LONG)) );
 			switch(wParam)
 			{
 			case VK_UP:
@@ -127,6 +140,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			cylinder->SetViewMatrix( ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
 												 D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 												 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
+			lights->SetEye( pSpectatorCoords->GetCartesianCoords() );
 
 			break;
 		}

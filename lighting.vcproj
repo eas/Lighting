@@ -235,6 +235,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="lighting"
+			>
+			<File
+				RelativePath=".\light.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\light.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"
 			>
