@@ -20,7 +20,7 @@ const unsigned nPointsPerCircle = 32;
 const unsigned nPointsPerGeneratrix = 16;
 const float Height = 50.0f;
 const float Radius = 8.0f;
-const float Freq = 1.0f;
+const float Freq = 0.0f;
 const float MaxAngle = D3DX_PI / 4;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -57,19 +57,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	Helper::SpectatorCoords spectatorCoords( 40.0f, D3DX_PI / 2, -D3DX_PI / 2 );
 
 	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, Freq, MaxAngle,
-					  Colors::White, Colors::Black, Colors::White, Colors::White);
+					  Colors::Black, Colors::Black, Colors::White, Colors::White);
 	cylinder.SetPositionMatrix( RotateZMatrix(D3DX_PI/2)*TranslationMatrix(0, -Height/2*0, 0) );
-	cylinder.SetPositionMatrix( UnityMatrix() );
+	cylinder.SetPositionMatrix( TranslationMatrix(0, -Height/2, 0) );
 	cylinder.SetViewMatrix( ViewMatrix( spectatorCoords.GetCartesianCoords(),
 										D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 										D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
 	cylinder.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
 
-	D3DXCOLOR ambient = Colors::Black;
+	D3DXCOLOR ambient = Colors::White;
 	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, 1.0f),
-									   Colors::Red,
-									   Colors::Black );
-	Lights lights(ambient, directionalLight);
+									   Colors::Blue,
+									   Colors::Red );
+	PointLight pointLight( D3DXVECTOR3(30.0f, 0.0f, 0.0f),
+						   Colors::Black,
+						   Colors::Black,
+						   1.0f, 0.0f, 0.0f );
+	Lights lights(ambient, directionalLight, pointLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );
 
 	SetWindowLong(mainWindow.GetHWND(), 0, reinterpret_cast<LONG>(&spectatorCoords));

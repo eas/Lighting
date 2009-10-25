@@ -94,15 +94,15 @@ Cylinder::~Cylinder()
 void Cylinder::Draw(const Lights& lights)
 {
 	float time = static_cast<float>(clock()) / CLOCKS_PER_SEC;
-	float angle = (sinf(freq_*time * (2*D3DX_PI)) + 1)/2 * maxAngle_;
+	float angle = (-cosf(freq_*time * (2*D3DX_PI)) + 1)/2 * maxAngle_;
 
 	vertexBuffer_.Use(0,0);
 	indexBuffer_.Use();
 	vertexDeclaration_.Use();
 	shader_.Use();
-	shader_.SetMatrix( projectiveMatrix_*viewMatrix_*positionMatrix_, 0 );
-	shader_.SetMatrix( RotateZMatrix( angle ), 4 );
-	shader_.SetMatrix( UnityMatrix(), 8);
+	shader_.SetMatrix( projectiveMatrix_*viewMatrix_, 0 );
+	shader_.SetMatrix( RotateZMatrix( angle )*positionMatrix_, 4 );
+	shader_.SetMatrix( positionMatrix_, 8);
 	shader_.SetConstantF(64, material_, 4);
 	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
