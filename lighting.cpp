@@ -67,12 +67,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	D3DXCOLOR ambient = Colors::White;
 	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, 1.0f),
-									   Colors::Blue,
-									   Colors::Red );
-	PointLight pointLight( D3DXVECTOR3(30.0f, 0.0f, 0.0f),
+									   Colors::Black,
+									   Colors::Black );
+	PointLight pointLight( D3DXVECTOR3(-15.0f, 0.0f, 0.0f),
 						   Colors::Black,
-						   Colors::Black,
-						   1.0f, 0.0f, 0.0f );
+						   Colors::Green,
+						   0.0f, 0.0f, 0.2f );
 	Lights lights(ambient, directionalLight, pointLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );
 
