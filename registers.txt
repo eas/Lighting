@@ -1,0 +1,26 @@
+r1 = eye - r10 / |eye-r10|
+r10 = position
+r7 = normal
+r0 = color
+
+r5 = 1 if (r1,n) > 0
+
+r2 = (-direct,n) if can light
+r3 = 1 if we can light
+
+r9 - direct of light
+r11 - attenuation
+
+
+c64 - material
+	c64 - ambient
+	c65 - emissive
+	c66 - diffuse
+	c67 - specular
+	
+Directional
+	c72 - c75
+Point
+	c76 - c80
+Spot
+	c84 - c90

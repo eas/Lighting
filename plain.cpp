@@ -33,16 +33,31 @@ void InitVertices( Vertices& vertices, Indices& indices )
 	assert( 0 == vertices.size() );
 	assert( 0 == indices.size() );
 	
-	const float size = 100.0f;
-	vertices.push_back( Vertex( 0.0f,  size,  size, 1.0f, 0.0f, 0.0f ) );
-	vertices.push_back( Vertex( 0.0f, -size,  size, 1.0f, 0.0f, 0.0f ) );
-	vertices.push_back( Vertex( 0.0f, -size, -size, 1.0f, 0.0f, 0.0f ) );
-	vertices.push_back( Vertex( 0.0f,  size, -size, 1.0f, 0.0f, 0.0f ) );
+	const float edgeSize = 100.0f;
+	const unsigned nVerticesPerEdge = 201;
+	for( unsigned i=0; i<nVerticesPerEdge; ++i )
+	{
+		for( unsigned j=0; j<nVerticesPerEdge; ++j )
+		{
+			vertices.push_back(
+				Vertex( 0.0f, edgeSize*i/(nVerticesPerEdge-1) - edgeSize/2, edgeSize*j/(nVerticesPerEdge-1) - edgeSize/2,
+				1.0f, 0.0f, 0.0f ) );
+		}
+	}
 
-	indices.push_back( 3 );
-	indices.push_back( 0 );
-	indices.push_back( 2 );
-	indices.push_back( 1 );
+	for( unsigned i=0; i<nVerticesPerEdge-1; ++i )
+	{
+		for( unsigned j=0; j<nVerticesPerEdge-1; ++j )
+		{
+			indices.push_back( (i)*nVerticesPerEdge + (j) );
+			indices.push_back( (i+1)*nVerticesPerEdge + (j) );
+			indices.push_back( (i+1)*nVerticesPerEdge + (j+1) );
+
+			indices.push_back( (i)*nVerticesPerEdge + (j) );
+			indices.push_back( (i+1)*nVerticesPerEdge + (j+1) );
+			indices.push_back( (i)*nVerticesPerEdge + (j+1) );
+		}
+	}
 }
 Plain::Plain( D3D::GraphicDevice &device,
 			  D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular)
@@ -58,7 +73,7 @@ Plain::Plain( D3D::GraphicDevice &device,
 	InitVertices( vertices, indices );
 
 	nVertices_ = vertices.size();
-	nPrimitives_ = indices.size() - 2;
+	nPrimitives_ = indices.size()/3;
 	vertexBuffer_.SetVertices( &vertices[0], vertices.size() );
 	indexBuffer_.SetIndices( &indices[0], indices.size() );
 	SetPositionMatrix( UnityMatrix() );
@@ -81,7 +96,7 @@ void Plain::Draw(const Lights& lights)
 	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
 
-	device_->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, 0, 0, nVertices_, 0, nPrimitives_);
+	device_->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, nVertices_, 0, nPrimitives_);
 }
 void Plain::SetPositionMatrix(const D3DXMATRIX& positionMatrix)
 {

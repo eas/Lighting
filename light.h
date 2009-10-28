@@ -24,8 +24,8 @@ struct Material
 
 struct DirectionalLight
 {
-	DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular )
-		:direct_(direct, 0), diffuse_(diffuse), specular_(specular)
+	DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular, float exp )
+		:direct_(direct, 0), diffuse_(diffuse), specular_(specular), specularConst_(exp, exp, exp, exp)
 	{
 		D3DXVec4Normalize(&direct_, &direct_);
 	}
@@ -33,6 +33,7 @@ struct DirectionalLight
 	D3DXVECTOR4 direct_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
+	D3DXVECTOR4 specularConst_;
 	operator float*()
 	{
 		return direct_;
@@ -42,16 +43,17 @@ struct DirectionalLight
 		return direct_;
 	}
 
-	static const unsigned nVectors = 3;
+	static const unsigned nVectors = 4;
 };
 struct PointLight
 {
 	PointLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
-				float a, float b, float c );
+				float a, float b, float c, float exp );
 	D3DXVECTOR4 position_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
+	D3DXVECTOR4 specularConst_;
 	operator float*()
 	{
 		return position_;
@@ -61,13 +63,13 @@ struct PointLight
 		return position_;
 	}
 
-	static const unsigned nVectors = 4;
+	static const unsigned nVectors = 5;
 };
 struct SpotLight
 {
 	SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
 			   float a, float b, float c, float innerAngle, float outerAngle,
-			   const D3DXVECTOR3& direct );
+			   const D3DXVECTOR3& direct, float exp );
 
 	D3DXVECTOR4 position_;
 	D3DXCOLOR diffuse_;
@@ -75,6 +77,7 @@ struct SpotLight
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
 	D3DXVECTOR4 angles_;
 	D3DXVECTOR4 direct_;
+	D3DXVECTOR4 specularConst_;
 	operator float*()
 	{
 		return position_;
@@ -84,7 +87,7 @@ struct SpotLight
 		return position_;
 	}
 
-	static const unsigned nVectors = 6;
+	static const unsigned nVectors = 7;
 };
 
 

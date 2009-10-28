@@ -4,6 +4,8 @@ dcl_normal v1
 
 def c100, 0.0, 0.0, 0.0, 0.0
 def c101, 1.0, 1.0, 1.0, 1.0
+def c104, 4.0, 4.0, 4.0, 4.0
+def c110, 60.0, 10.0, 10.0, 10.0
 
 ; c0 - proj*view
 ; c4, c8 - skinning
@@ -45,7 +47,7 @@ mov r0, c64
 mul r0, r0, c68
 mul r0, r0, r5		; 0 if we can't see light( we are behind the triangle )
 add r0, r0, c65
-;4 instructions are used here, 36 total
+
 
 
 ;CAN'T CHANGE: r1 = eye-vertex, r5 = 1 if we can see light(using n), r10 = vertex, r7 = normal
@@ -54,19 +56,20 @@ add r0, r0, c65
 	; c72	direct
 	; c73	diffuse
 	; c74	specular
+	; c75	specularConst
 
 dp3 r2, -c72, r7	;(-direct, n)
 
 sge r3, r2, c100	; 0 if we can't light this vertex
 max r2, r2, c100
-;3 instructions are used here, 39 total
+
 
 
 ;diffuse
 mul r4, r2, c73
 mul r4, r4, r5
 mad r0, r4, c66, r0
-;3 instructions are use here, 42 total
+
 
 
 ;specular
@@ -80,12 +83,13 @@ dp3 r4, r4, r1	; ((eye-vertex) , (specular))
 sge r6, r4, c100
 mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
 
-mul r4, r4, r4
-;must add r4^f
+mov r3, r4
+mov r3.w, c75.x
+lit r3, r3
+mov r4, r3.zzzz
 
 mul r4, r4, c67
 mad r0, r4, c74, r0
-;9+1 instructions are used here, 51+1 total
 
 ;CAN'T CHANGE: r1 = eye-vertex, r5 = 1 if we can see light(using n), r10 = vertex, r7 = normal
 ;r0 - current result
@@ -94,7 +98,8 @@ mad r0, r4, c74, r0
 	; c77	diffuse
 	; c78	specular
 	; c79	attenuation
-add r9, r10, -c76 ; direct
+	; c80	specularConst
+add r9, r10, -c76 ; light_direct
 
 dp3 r3, r9, r9 ; distance^2
 mul r4, r3, c79.zzzz
@@ -106,7 +111,7 @@ add r11, r4, c79.xxxx
 rcp r11, r11.x ; attenuation
 ;can use r4, r3
 
-dp3 r2, -r9, r7	;(-direct, n)
+dp3 r2, -r9, r7	;(-light_direct, n)
 sge r3, r2, c100	; 0 if we can't light this vertex
 max r2, r2, c100
 
@@ -118,7 +123,7 @@ mad r0, r4, c66, r0
 
 ;specular
 add r4, r2, r2	;(-direct, n)*2
-mad r4, r4, r7, r9	; r from Fong
+mad r4, r4, r7, r9	; r from Fong, specular light
 
 mul r4, r3, r4	; if we can't light this vertex
 mul r4, r5, r4	; if we can't see specluar light because we are on another side( behind triangle )
@@ -127,8 +132,17 @@ dp3 r4, r4, r1	; ((eye-vertex) , (specular))
 sge r6, r4, c100
 mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
 
-mul r4, r4, r4
-;must add r4^f
+;mul r4, r4, r4
+;mul r4, r4, r4
+;mul r4, r4, r4
+;mul r4, r4, r4
+;mul r4, r4, r4
+mov r3, r4
+mov r3.w, c80.x
+lit r3, r3
+mov r4, r3.zzzz
+;mov r4, c101
+
 
 mul r4, r4, c67
 mul r4, r4, r11
@@ -137,35 +151,45 @@ mad r0, r4, c78, r0
 ;CAN'T CHANGE: r1 = eye-vertex, r5 = 1 if we can see light(using n), r10 = vertex, r7 = normal
 ;r0 - current result
 ;----------------Spot Light--------------------------------
-	; c80	position
-	; c81	diffuse
-	; c82	specular
-	; c83	attenuation
-	; c84	angles
-	; c85	direct
-add r9, r10, -c80 ; direct( vertex-position )
+	; c84	position
+	; c85	diffuse
+	; c86	specular
+	; c87	attenuation
+	; c88	angles
+	; c89	direct
+	; c90	specularConst
+add r9, r10, -c84 ; direct( vertex-position )
 
 dp3 r3, r9, r9 ; distance^2
-mul r4, r3, c83.zzzz
+mul r4, r3, c87.zzzz
 rsq r6, r3.x
 mul r9, r9, r6 ; normalize direct
 mul r3, r3, r6 ; distance
-mad r4, c83.yyyy, r3, r4
-add r11, r4, c83.xxxx
+mad r4, c87.yyyy, r3, r4
+add r11, r4, c87.xxxx
 rcp r11, r11.x ; attenuation
 ;can use r4, r3	
 
+dp3 r6, c89, r9;	(direct, spot_direct)
+
+;must change attenuation if position is between inner and outter angles
+;can use r2, r3, r4, r8; r6 = cosf^2(fi); c84 - angles z, w = alpha, beta
+sge r2, r6, c88.zzzz
+slt r3, r6, c88.zzzz
+sge r4, r6, c88.wwww
+mul r3, r3, r4
+rsq r6, r6.x
+rcp r6, r6.x
+mad r4, r6, c88.yyyy, c88.xxxx
+mad r2, r4, r3, r2
+mul r11, r2, r11
+
 dp3 r2, -r9, r7		;(-direct, n)
 sge r3, r2, c100	; 0 if we can't light this vertex because of normal
-
-dp3 r6, c85, r9;	(direct, spot_direct)
-sge r4, r6, c84.zzzz
-;mul r3, r4, r3		; 0 if we can't light this vertex because of normal or direct
-
 mul r2, r2, r3
 
 ;diffuse
-mul r4, r2, c81
+mul r4, r2, c85
 mul r4, r4, r5
 mul r4, r4, r11
 mad r0, r4, c66, r0
@@ -181,11 +205,14 @@ dp3 r4, r4, r1	; ((eye-vertex) , (specular))
 sge r6, r4, c100
 mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
 
-mul r4, r4, r4
-;must add r4^f
+mov r3, r4
+mov r3.w, c90.x
+lit r3, r3
+mov r4, r3.zzzz
+
 
 mul r4, r4, c67
 mul r4, r4, r11
-mad r0, r4, c82, r0
+mad r0, r4, c86, r0
 
 mov oD0, r0

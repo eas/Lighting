@@ -70,7 +70,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	cylinder.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
 
 	Plain plain( graphicDevice,
-				 Colors::Black, Colors::White, Colors::Black, Colors::Black );
+				 Colors::Black, Colors::Black, Colors::White, Colors::White );
 
 	plain.SetPositionMatrix( UnityMatrix() );
 	plain.SetViewMatrix( ViewMatrix( spectatorCoords.GetCartesianCoords(),
@@ -79,19 +79,22 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	plain.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
 	
 	D3DXCOLOR ambient = Colors::White;
-	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, 1.0f),
+	DirectionalLight directionalLight( D3DXVECTOR3(-1.0f, 0.0f, 0.0f),
 									   Colors::Black,
-									   Colors::Black );
-	PointLight pointLight( D3DXVECTOR3(-15.0f, 0.0f, 0.0f),
-						   Colors::Red,
+									   Colors::Black,
+									   100.0f );
+	PointLight pointLight( D3DXVECTOR3(10000.0f, 0.0f, 0.0f),
 						   Colors::Black,
-						   0.0f, 0.0f, 0.02f );
-	SpotLight spotLight( D3DXVECTOR3(9.0f, 0.0f, 0.0f),
-						 Colors::Black,
-						 Colors::Black,
-						 0.0f, 0.0f, 0.02f,
-						 D3DX_PI/64, D3DX_PI/64,
-						 D3DXVECTOR3(-1.0f, 0.0f, 0.0f) );
+						   Colors::Black,
+						   0.0f, 0.0001f, 0.000f, 
+						   10.0f );
+	SpotLight spotLight( D3DXVECTOR3(20.0f, 0.0f, 0.0f),
+						 Colors::Red,
+						 Colors::Green,
+						 1.0f, 0.0f, 0.000f,
+						 6*D3DX_PI/64, 16*D3DX_PI/64,
+						 D3DXVECTOR3(-1.0f, 0.0f, 0.0f),
+						 2.0f );
 
 	Lights lights(ambient, directionalLight, pointLight, spotLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );
