@@ -247,6 +247,22 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="plain"
+			>
+			<File
+				RelativePath=".\plain.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\plain.h"
+				>
+			</File>
+			<File
+				RelativePath=".\plain.vsh"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"
 			>

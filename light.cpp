@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "light.h"
 
-Lights::Lights(const D3DXCOLOR& ambient, const DirectionalLight& directionalLight, const PointLight& pointLight)
-	:ambient_(ambient), directionalLight_(directionalLight), pointLight_(pointLight)
+Lights::Lights(const D3DXCOLOR& ambient, const DirectionalLight& directionalLight,
+			   const PointLight& pointLight, const SpotLight& spotLight)
+	:ambient_(ambient), directionalLight_(directionalLight), pointLight_(pointLight), spotLight_(spotLight)
 {
 }
 
@@ -12,6 +13,7 @@ void Lights::SetLights(D3D::Shader& shader) const
 	shader.SetConstantF(69, eye_, 1);
 	shader.SetConstantF(72, directionalLight_, DirectionalLight::nVectors);
 	shader.SetConstantF(76, pointLight_, PointLight::nVectors);
+	shader.SetConstantF(80, spotLight_, SpotLight::nVectors);
 }
 void Lights::SetEye(const D3DXVECTOR3 &eye)
 {
@@ -25,8 +27,12 @@ PointLight::PointLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, c
 }
 
 SpotLight::SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
-					  float a, float b, float c, float innerAngle, float outerAngle )
+					  float a, float b, float c, float innerAngle, float outerAngle,
+					  const D3DXVECTOR3& direct )
 	:position_(position, 0.0f), diffuse_(diffuse), specular_(specular),
-	 attenuation_(a, b, c, 0.0f), angles_(innerAngle, outerAngle, 0, 0)
+	 attenuation_(a, b, c, 0.0f), angles_(innerAngle, outerAngle,
+										  cosf(innerAngle)*cosf(innerAngle), cosf(outerAngle)*cosf(outerAngle)),
+     direct_(direct, 0)
 {
+	D3DXVec4Normalize(&direct_, &direct_);
 }

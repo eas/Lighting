@@ -8,6 +8,7 @@
 
 #include "cylinder.h"
 #include "light.h"
+#include "plain.h"
 
 #ifndef NDEBUG
 	#define new new( _CLIENT_BLOCK, __FILE__, __LINE__)
@@ -16,7 +17,7 @@
 const float FrontClippingPlane = 0.5f;
 const float BackClippingPlane = 1.0e13f;
 
-const unsigned nPointsPerCircle = 32;
+const unsigned nPointsPerCircle = 4; //32;
 const unsigned nPointsPerGeneratrix = 16;
 const float Height = 50.0f;
 const float Radius = 8.0f;
@@ -25,10 +26,13 @@ const float MaxAngle = D3DX_PI / 4;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
-			Cylinder& cylinder, const Lights& lights)
+			Cylinder& cylinder, const Lights& lights, Plain& plain)
 {
+	cylinder;
+
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
-	cylinder.Draw(lights);
+	//cylinder.Draw(lights);
+	plain.Draw(lights);
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -38,7 +42,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
 { // code block
 	Helper::Window mainWindow(	hInstance, nCmdShow, &WndProc,
-								L"Lighting", L"lighting", 3 );
+								L"Lighting", L"lighting", 4 );
 
 	D3DPRESENT_PARAMETERS params;
 		ZeroMemory( &params, sizeof( params ) );
@@ -65,20 +69,37 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 										D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
 	cylinder.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
 
+	Plain plain( graphicDevice,
+				 Colors::Black, Colors::White, Colors::Black, Colors::Black );
+
+	plain.SetPositionMatrix( UnityMatrix() );
+	plain.SetViewMatrix( ViewMatrix( spectatorCoords.GetCartesianCoords(),
+									 D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+									 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
+	plain.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
+	
 	D3DXCOLOR ambient = Colors::White;
 	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, 1.0f),
 									   Colors::Black,
 									   Colors::Black );
 	PointLight pointLight( D3DXVECTOR3(-15.0f, 0.0f, 0.0f),
+						   Colors::Red,
 						   Colors::Black,
-						   Colors::Green,
-						   0.0f, 0.0f, 0.2f );
-	Lights lights(ambient, directionalLight, pointLight);
+						   0.0f, 0.0f, 0.02f );
+	SpotLight spotLight( D3DXVECTOR3(9.0f, 0.0f, 0.0f),
+						 Colors::Black,
+						 Colors::Black,
+						 0.0f, 0.0f, 0.02f,
+						 D3DX_PI/64, D3DX_PI/64,
+						 D3DXVECTOR3(-1.0f, 0.0f, 0.0f) );
+
+	Lights lights(ambient, directionalLight, pointLight, spotLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );
 
 	SetWindowLong(mainWindow.GetHWND(), 0, reinterpret_cast<LONG>(&spectatorCoords));
 	SetWindowLong(mainWindow.GetHWND(), sizeof(LONG), reinterpret_cast<LONG>(&cylinder));
 	SetWindowLong(mainWindow.GetHWND(), 2*sizeof(LONG), reinterpret_cast<LONG>(&lights));
+	SetWindowLong(mainWindow.GetHWND(), 3*sizeof(LONG), reinterpret_cast<LONG>(&plain));
 
 	MSG msg;
 
@@ -92,7 +113,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         }
         else
 		{
-			Render(graphicDevice, spectatorCoords, cylinder, lights);
+			Render(graphicDevice, spectatorCoords, cylinder, lights, plain);
 		}
     }
 } // code block
@@ -112,10 +133,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Helper::SpectatorCoords* pSpectatorCoords = NULL;
 			Cylinder* cylinder = NULL;
 			Lights* lights = NULL;
+			Plain* plain = NULL;
 			pSpectatorCoords = reinterpret_cast<Helper::SpectatorCoords*>(
 												GetWindowLong(hWnd, 0));
 			cylinder = reinterpret_cast<Cylinder*>( GetWindowLong(hWnd,sizeof(LONG)) );
 			lights = reinterpret_cast<Lights*>( GetWindowLong(hWnd, 2*sizeof(LONG)) );
+			plain = reinterpret_cast<Plain*>( GetWindowLong(hWnd, 3*sizeof(LONG)) );
+
 			switch(wParam)
 			{
 			case VK_UP:
@@ -144,6 +168,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			cylinder->SetViewMatrix( ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
 												 D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 												 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
+			plain->SetViewMatrix( ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
+				 							  D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+											  D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
 			lights->SetEye( pSpectatorCoords->GetCartesianCoords() );
 
 			break;

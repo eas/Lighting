@@ -66,13 +66,15 @@ struct PointLight
 struct SpotLight
 {
 	SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
-				float a, float b, float c, float innerAngle, float outerAngle );
+			   float a, float b, float c, float innerAngle, float outerAngle,
+			   const D3DXVECTOR3& direct );
 
 	D3DXVECTOR4 position_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
 	D3DXVECTOR4 angles_;
+	D3DXVECTOR4 direct_;
 	operator float*()
 	{
 		return position_;
@@ -82,14 +84,15 @@ struct SpotLight
 		return position_;
 	}
 
-	static const unsigned nVectors = 5;
+	static const unsigned nVectors = 6;
 };
 
 
 class Lights
 {
 public:
-	Lights(const D3DXCOLOR& ambient, const DirectionalLight& directionalLight, const PointLight& pointLight);
+	Lights(const D3DXCOLOR& ambient, const DirectionalLight& directionalLight,
+		   const PointLight& pointLight, const SpotLight& spotLight);
 	void SetLights(D3D::Shader& shader) const;
 	void SetEye(const D3DXVECTOR3& eye);
 private:
@@ -100,4 +103,5 @@ private:
 	D3DXVECTOR4 eye_;
 	DirectionalLight directionalLight_;
 	PointLight pointLight_;
+	SpotLight spotLight_;
 };

@@ -1,30 +1,20 @@
 vs_1_1
 dcl_position v0
 dcl_normal v1
-dcl_texcoord v2 ; skinning weights
+
 def c100, 0.0, 0.0, 0.0, 0.0
 def c101, 1.0, 1.0, 1.0, 1.0
 
 ; c0 - proj*view
 ; c4, c8 - skinning
 
-;--------------------------------Calculating Position----------------------------------------------
-m4x4 r10, v0, c4
-m4x4 r1, v0, c8
-mul r10, r10, v2.xxxx
-mad r10, r1, v2.yyyy, r10
-m4x4 oPos, r10, c0
-;14 instructions are used here
+
+m4x4 oPos, v0, c0
+mov r10, v0
 
 ;--------------------------------Calculating Normal------------------------------------------------
 ;r7 <-new normal
-mov r5, c100
-mov r5.xyz, v1.xyz
-m4x4 r7, r5, c4
-m4x4 r6, r5, c8
-mul r7, r7, v2.xxxx
-mad r7, r6, v2.yyyy, r7
-;12 instructions are used here, 26 total
+mov r7, v1
 
 
 
