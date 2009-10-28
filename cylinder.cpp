@@ -17,11 +17,9 @@
 	#define new new( _CLIENT_BLOCK, __FILE__, __LINE__)
 #endif
 
-using namespace D3D;
-
 typedef Cylinder::Vertex Vertex;
 typedef std::vector<Vertex> Vertices;
-typedef std::vector<Index> Indices;
+typedef std::vector<D3D::Index> Indices;
 
 static const D3DVERTEXELEMENT9 DefaultVertexDeclaration[] =  {
 		{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
@@ -32,23 +30,28 @@ static const D3DVERTEXELEMENT9 DefaultVertexDeclaration[] =  {
 
 void InitVertices(	Vertices& vertices, Indices& indices, 
 					unsigned nPointsPerCircle, unsigned nPointsPerGeneratrix,
-					float height, float R )
+					float height, float Radius )
 {
+	assert( 2 < nPointsPerCircle );
+	assert( 2 < nPointsPerGeneratrix );
+	assert( 0 < height );
+	assert( 0 < Radius );
+
 	const float angleStep = 2*D3DX_PI / nPointsPerCircle;
 	const float heightStep = height / (nPointsPerGeneratrix-1);
 
-	float h = 0;
+	float curHeight = 0;
 	for( unsigned i = 0; i<nPointsPerGeneratrix; ++i )
 	{
 		float angle = 0;
 		for( unsigned j = 0; j<nPointsPerCircle; ++j )
 		{
-			vertices.push_back( Vertex(	R*cosf(angle), h, R*sinf(angle),
+			vertices.push_back( Vertex(	Radius*cosf(angle), curHeight, Radius*sinf(angle),
 										cosf(angle), 0, sinf(angle),
-										h/height, 1-h/height) );
+										curHeight/height, 1-curHeight/height) );
 			angle += angleStep;
 		}
-		h+=heightStep;
+		curHeight+=heightStep;
 	}
 
 	for( unsigned level = 0; level<nPointsPerGeneratrix-1; ++level )
@@ -64,7 +67,7 @@ void InitVertices(	Vertices& vertices, Indices& indices,
 }
 
 Cylinder::Cylinder(unsigned int nPointsPerCircle, unsigned int nPointsPerGeneratrix, 
-				   float height, float R, D3D::GraphicDevice &device, float freq, float maxAngle,
+				   float height, float Radius, D3D::GraphicDevice &device, float freq, float maxAngle,
 				   D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular)
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
@@ -78,7 +81,7 @@ Cylinder::Cylinder(unsigned int nPointsPerCircle, unsigned int nPointsPerGenerat
 	Vertices vertices;
 	Indices indices;
 	InitVertices( vertices, indices, nPointsPerCircle, nPointsPerGeneratrix,
-				  height, R );
+				  height, Radius );
 
 	nVertices_ = vertices.size();
 	nPrimitives_ = indices.size() - 2;

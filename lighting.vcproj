@@ -263,6 +263,22 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="sphere"
+			>
+			<File
+				RelativePath=".\sphere.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sphere.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sphere.vsh"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"
 			>

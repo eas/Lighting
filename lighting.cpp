@@ -7,6 +7,7 @@
 #include "matrices.h"
 
 #include "cylinder.h"
+#include "sphere.h"
 #include "light.h"
 #include "plain.h"
 
@@ -17,22 +18,27 @@
 const float FrontClippingPlane = 0.5f;
 const float BackClippingPlane = 1.0e13f;
 
-const unsigned nPointsPerCircle = 4; //32;
+const unsigned nPointsPerCircle = 32;
 const unsigned nPointsPerGeneratrix = 16;
 const float Height = 50.0f;
 const float Radius = 8.0f;
-const float Freq = 0.0f;
+const float CylinderFreq = 0.0f;
 const float MaxAngle = D3DX_PI / 4;
+
+const float SphereRadius = 8.0f;
+const unsigned TesselationLevel = 5;
+const float SphereFreq = 0.0f;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
-			Cylinder& cylinder, const Lights& lights, Plain& plain)
+			Cylinder& cylinder, Sphere& sphere, const Lights& lights, Plain& plain)
 {
-	cylinder;
+	cylinder; plain; sphere;
 
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
-	//cylinder.Draw(lights);
-	plain.Draw(lights);
+	cylinder.Draw(lights);
+	sphere.Draw();
+	//plain.Draw(lights);
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -42,7 +48,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
 { // code block
 	Helper::Window mainWindow(	hInstance, nCmdShow, &WndProc,
-								L"Lighting", L"lighting", 4 );
+								L"Lighting", L"lighting", 5 );
 
 	D3DPRESENT_PARAMETERS params;
 		ZeroMemory( &params, sizeof( params ) );
@@ -60,24 +66,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	Helper::SpectatorCoords spectatorCoords( 40.0f, D3DX_PI / 2, -D3DX_PI / 2 );
 
-	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, Freq, MaxAngle,
-					  Colors::Black, Colors::Black, Colors::White, Colors::White);
-	cylinder.SetPositionMatrix( RotateZMatrix(D3DX_PI/2)*TranslationMatrix(0, -Height/2*0, 0) );
-	cylinder.SetPositionMatrix( TranslationMatrix(0, -Height/2, 0) );
-	cylinder.SetViewMatrix( ViewMatrix( spectatorCoords.GetCartesianCoords(),
+	D3DXMATRIX viewMatrix = ViewMatrix( spectatorCoords.GetCartesianCoords(),
 										D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-										D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
-	cylinder.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
+										D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+	D3DXMATRIX projectiveMatrix = ProjectiveMatrix( FrontClippingPlane, BackClippingPlane );
+
+	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, CylinderFreq, MaxAngle,
+					  Colors::Black, Colors::Black, Colors::White, Colors::White);
+	cylinder.SetPositionMatrix( TranslationMatrix(0, -Height/2, 0) );
+	cylinder.SetViewMatrix( viewMatrix );
+	cylinder.SetProjectiveMatrix( projectiveMatrix );
 
 	Plain plain( graphicDevice,
 				 Colors::Black, Colors::Black, Colors::White, Colors::White );
-
 	plain.SetPositionMatrix( UnityMatrix() );
-	plain.SetViewMatrix( ViewMatrix( spectatorCoords.GetCartesianCoords(),
-									 D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-									 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
-	plain.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
+	plain.SetViewMatrix( viewMatrix );
+	plain.SetProjectiveMatrix( projectiveMatrix );
 	
+	Sphere sphere( SphereRadius, TesselationLevel, graphicDevice, SphereFreq );
+	sphere.SetPositionMatrix( TranslationMatrix( -2*SphereRadius - 2*Radius, 0.0f, 0.0f ) );
+	sphere.SetViewMatrix( viewMatrix );
+	sphere.SetProjectiveMatrix( projectiveMatrix );
+
 	D3DXCOLOR ambient = Colors::White;
 	DirectionalLight directionalLight( D3DXVECTOR3(-1.0f, 0.0f, 0.0f),
 									   Colors::Black,
@@ -99,10 +109,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	Lights lights(ambient, directionalLight, pointLight, spotLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );
 
-	SetWindowLong(mainWindow.GetHWND(), 0, reinterpret_cast<LONG>(&spectatorCoords));
-	SetWindowLong(mainWindow.GetHWND(), sizeof(LONG), reinterpret_cast<LONG>(&cylinder));
+	SetWindowLong(mainWindow.GetHWND(), 0			  , reinterpret_cast<LONG>(&spectatorCoords));
+	SetWindowLong(mainWindow.GetHWND(), 1*sizeof(LONG), reinterpret_cast<LONG>(&cylinder));
 	SetWindowLong(mainWindow.GetHWND(), 2*sizeof(LONG), reinterpret_cast<LONG>(&lights));
-	SetWindowLong(mainWindow.GetHWND(), 3*sizeof(LONG), reinterpret_cast<LONG>(&plain));
+	SetWindowLong(mainWindow.GetHWND(), 3*sizeof(LONG), reinterpret_cast<LONG>(&sphere));
+	SetWindowLong(mainWindow.GetHWND(), 4*sizeof(LONG), reinterpret_cast<LONG>(&plain));
 
 	MSG msg;
 
@@ -116,7 +127,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         }
         else
 		{
-			Render(graphicDevice, spectatorCoords, cylinder, lights, plain);
+			Render(graphicDevice, spectatorCoords, cylinder, sphere, lights, plain);
 		}
     }
 } // code block
@@ -137,11 +148,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Cylinder* cylinder = NULL;
 			Lights* lights = NULL;
 			Plain* plain = NULL;
+			Sphere* sphere = NULL;
 			pSpectatorCoords = reinterpret_cast<Helper::SpectatorCoords*>(
 												GetWindowLong(hWnd, 0));
 			cylinder = reinterpret_cast<Cylinder*>( GetWindowLong(hWnd,sizeof(LONG)) );
 			lights = reinterpret_cast<Lights*>( GetWindowLong(hWnd, 2*sizeof(LONG)) );
-			plain = reinterpret_cast<Plain*>( GetWindowLong(hWnd, 3*sizeof(LONG)) );
+			sphere = reinterpret_cast<Sphere*>( GetWindowLong(hWnd, 3*sizeof(LONG)) );
+			plain = reinterpret_cast<Plain*>( GetWindowLong(hWnd, 4*sizeof(LONG)) );
 
 			switch(wParam)
 			{
@@ -168,12 +181,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			default:
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
-			cylinder->SetViewMatrix( ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
+			D3DXMATRIX viewMatrix = ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
 												 D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-												 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
-			plain->SetViewMatrix( ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
-				 							  D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-											  D3DXVECTOR3(0.0f, 1.0f, 0.0f)) );
+												 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) ;
+			cylinder->SetViewMatrix( viewMatrix );
+			sphere->SetViewMatrix( viewMatrix );
+			plain->SetViewMatrix( viewMatrix );
 			lights->SetEye( pSpectatorCoords->GetCartesianCoords() );
 
 			break;
