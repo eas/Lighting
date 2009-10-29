@@ -30,7 +30,7 @@ private:
 	D3DXMATRIX positionMatrix_, viewMatrix_, projectiveMatrix_;
 	unsigned nVertices_;
 	unsigned nPrimitives_;
-	Material material_;
+	const Material material_;
 };
 
 struct Plain::Vertex

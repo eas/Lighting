@@ -283,6 +283,10 @@
 			RelativePath=".\ReadMe.txt"
 			>
 		</File>
+		<File
+			RelativePath=".\registers.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

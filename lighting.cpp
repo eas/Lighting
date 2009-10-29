@@ -37,7 +37,7 @@ void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
 
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
 	cylinder.Draw(lights);
-	sphere.Draw();
+	sphere.Draw(lights);
 	//plain.Draw(lights);
 }
 

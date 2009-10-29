@@ -57,7 +57,7 @@ Sphere::Sphere( float radius, unsigned tesselationLevel, D3D::GraphicDevice devi
 Sphere::~Sphere()
 {
 }
-void Sphere::Draw()
+void Sphere::Draw(const Lights& lights)
 {
 	float time = static_cast<float>(clock()) / CLOCKS_PER_SEC;
 	float weight = 1-(-cosf(freq_*time * (2*D3DX_PI)) + 1)/2;
@@ -65,9 +65,12 @@ void Sphere::Draw()
 	indexBuffer_.Use();
 	vertexDeclaration_.Use();
 	shader_.Use();
-	shader_.SetMatrix( projectiveMatrix_*viewMatrix_*positionMatrix_, 0 );
+	shader_.SetMatrix( projectiveMatrix_*viewMatrix_, 0 );
+	shader_.SetMatrix( positionMatrix_, 6 );
 	shader_.SetConstantF(4, radius_);
-	shader_.SetConstantF(5, weight);
+	shader_.SetConstantF(5, D3DXVECTOR4(weight, 1-weight, 0.0f, 0.0f), 1);
+	shader_.SetConstantF(64, material_, 4);
+	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
 
 	device_->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, nVertices_, 0, nPrimitives_);

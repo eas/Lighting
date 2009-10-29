@@ -34,7 +34,7 @@ private:
 	unsigned nPrimitives_;
 	const float freq_;
 	const float maxAngle_;
-	Material material_;
+	const Material material_;
 };
 
 struct Cylinder::Vertex

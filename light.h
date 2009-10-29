@@ -20,6 +20,10 @@ struct Material
 	{
 		return ambient;
 	}
+	operator const float*() const
+	{
+		return ambient;
+	}
 };
 
 struct DirectionalLight
