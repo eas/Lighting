@@ -1,7 +1,8 @@
 vs_1_1
 dcl_position v0
-dcl_color v1
+dcl_normal v1
 
+def c100, 0.0, 0.0, 0.0, 0.0
 ; c0 - matrix
 ; c4 - R
 ; c5 - weight

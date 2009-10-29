@@ -27,7 +27,7 @@ const float MaxAngle = D3DX_PI / 4;
 
 const float SphereRadius = 8.0f;
 const unsigned TesselationLevel = 5;
-const float SphereFreq = 0.0f;
+const float SphereFreq = 1.0f;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
@@ -83,7 +83,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	plain.SetViewMatrix( viewMatrix );
 	plain.SetProjectiveMatrix( projectiveMatrix );
 	
-	Sphere sphere( SphereRadius, TesselationLevel, graphicDevice, SphereFreq );
+	Sphere sphere( SphereRadius, TesselationLevel, graphicDevice, SphereFreq,
+				   Colors::Black, Colors::Black, Colors::White, Colors::White );
 	sphere.SetPositionMatrix( TranslationMatrix( -2*SphereRadius - 2*Radius, 0.0f, 0.0f ) );
 	sphere.SetViewMatrix( viewMatrix );
 	sphere.SetProjectiveMatrix( projectiveMatrix );

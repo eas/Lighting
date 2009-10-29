@@ -18,7 +18,6 @@ typedef D3D::Index Index;
 static const D3DVERTEXELEMENT9 DefaultVertexDeclaration[] = {
 		{0, 0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
 		{0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL, 0},
-		{0, 24, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR, 0},
 		D3DDECL_END() };
 
 class Node;
@@ -31,7 +30,8 @@ Node* GetOrCreateChild(Node& parent1, Node& parent2, Vertices& vertices);
 Vertex SumWithWeight( const Vertex &v1, const Vertex &v2, float weight );
 
 
-Sphere::Sphere(float radius, unsigned tesselationLevel, D3D::GraphicDevice device, float freq)
+Sphere::Sphere( float radius, unsigned tesselationLevel, D3D::GraphicDevice device, float freq,
+			    D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular )
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
@@ -39,7 +39,8 @@ Sphere::Sphere(float radius, unsigned tesselationLevel, D3D::GraphicDevice devic
 	  shader_(device, L"sphere.vsh"),
 	  radius_(radius),
 	  tesselationLevel_(tesselationLevel),
-	  freq_(freq)
+	  freq_(freq),
+	  material_( ambient, emissive, diffuse, specular )
 {
 	Vertices vertices;
 	Indices indices;
@@ -151,7 +152,7 @@ Node* GetOrCreateChild(Node& parent1, Node& parent2, Vertices& vertices)
 	}
 	vertices.push_back( SumWithWeight(	vertices[parent1.GetIndex()],
 										vertices[parent2.GetIndex()],
-										0.5f ));
+										0.5f ) );
 	Node* node = new Node(&parent1, &parent2, vertices.size()-1);
 	parent1.AddChild(node);
 	parent2.AddChild(node);
@@ -187,50 +188,91 @@ void InitVertices(	unsigned recursionDepth, float edgeSize,
 {
 	std::vector<Node> nodes;
 
-	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f, -edgeSize/ 2, Colors::Red ) );
-	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f, -edgeSize/ 2, Colors::Green ) );
-	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f,  edgeSize/ 2, Colors::Cyan ) );
-	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f,  edgeSize/ 2, Colors::Magenta ) );
-	pyramidVertices.push_back( Vertex( 0.0f,  edgeSize*sqrtf(2.0f)/2, 0.0f, Colors::White ) );
-	pyramidVertices.push_back( Vertex( 0.0f, -edgeSize*sqrtf(2.0f)/2, 0.0f, Colors::Black ) );
-	
-	for( Index index=0; index<6; ++index )
+	const float alpha = atanf( sqrtf(2.0f) );
+	const float cosAlpha = cosf(alpha);
+	const float sinAlpha = sinf(alpha);
+
+	//top right triangle
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f, -edgeSize/ 2,
+										sinAlpha,  cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f,  edgeSize/ 2,
+										sinAlpha,  cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex(  0.0f,  edgeSize*sqrtf(2.0f)/2, 0.0f,
+										sinAlpha,  cosAlpha,  0.0f ) );
+
+	//top back triangle
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f,  edgeSize/ 2,
+										0.0f,  cosAlpha,  sinAlpha ) );
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f,  edgeSize/ 2,
+										0.0f,  cosAlpha,  sinAlpha ) );
+	pyramidVertices.push_back( Vertex(  0.0f,  edgeSize*sqrtf(2.0f)/2, 0.0f,
+										0.0f,  cosAlpha,  sinAlpha ) );
+
+	//top left triangle
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f,  edgeSize/ 2,
+									   -sinAlpha,  cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f, -edgeSize/ 2,
+									   -sinAlpha,  cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex(  0.0f,  edgeSize*sqrtf(2.0f)/2, 0.0f,
+									   -sinAlpha,  cosAlpha,  0.0f ) );
+
+	//top fron triangle
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f, -edgeSize/ 2,
+										0.0f,  cosAlpha, -sinAlpha ) );
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f, -edgeSize/ 2,
+										0.0f,  cosAlpha, -sinAlpha ) );
+	pyramidVertices.push_back( Vertex(  0.0f,  edgeSize*sqrtf(2.0f)/2, 0.0f,
+										0.0f,  cosAlpha, -sinAlpha ) );
+
+
+
+	//bottom right triangle
+	pyramidVertices.push_back( Vertex(  0.0f, -edgeSize*sqrtf(2.0f)/2, 0.0f,
+										sinAlpha, -cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f, -edgeSize/ 2,
+										sinAlpha, -cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f,  edgeSize/ 2,
+										sinAlpha, -cosAlpha,  0.0f ) );
+
+	//bottom back triangle
+	pyramidVertices.push_back( Vertex(  0.0f, -edgeSize*sqrtf(2.0f)/2, 0.0f,
+										0.0f, -cosAlpha,  sinAlpha ) );
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f,  edgeSize/ 2,
+										0.0f, -cosAlpha,  sinAlpha ) );
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f,  edgeSize/ 2,
+										0.0f, -cosAlpha,  sinAlpha ) );
+
+	//bottom left triangle
+	pyramidVertices.push_back( Vertex(  0.0f, -edgeSize*sqrtf(2.0f)/2, 0.0f,
+									   -sinAlpha, -cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f,  edgeSize/ 2,
+									   -sinAlpha, -cosAlpha,  0.0f ) );
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f, -edgeSize/ 2,
+									   -sinAlpha, -cosAlpha,  0.0f ) );
+
+	//bottom fron triangle
+	pyramidVertices.push_back( Vertex(  0.0f, -edgeSize*sqrtf(2.0f)/2, 0.0f,
+										0.0f, -cosAlpha, -sinAlpha ) );
+	pyramidVertices.push_back( Vertex( -edgeSize/2, 0.0f, -edgeSize/ 2,
+										0.0f, -cosAlpha, -sinAlpha ) );
+	pyramidVertices.push_back( Vertex(  edgeSize/2, 0.0f, -edgeSize/ 2,
+										0.0f, -cosAlpha, -sinAlpha ) );
+
+
+	for( Index index=0; index<pyramidVertices.size(); ++index )
 	{
 		nodes.push_back( Node(NULL, NULL, index) );
 	}
 
-	Tessellation( nodes[0], nodes[4], nodes[1], pyramidVertices, pyramidIndices, 0, recursionDepth );
-	Tessellation( nodes[1], nodes[4], nodes[2], pyramidVertices, pyramidIndices, 0, recursionDepth );
-	Tessellation( nodes[2], nodes[4], nodes[3], pyramidVertices, pyramidIndices, 0, recursionDepth );
-	Tessellation( nodes[3], nodes[4], nodes[0], pyramidVertices, pyramidIndices, 0, recursionDepth );
-
-	Tessellation( nodes[0], nodes[1], nodes[5], pyramidVertices, pyramidIndices, 0, recursionDepth );
-	Tessellation( nodes[1], nodes[2], nodes[5], pyramidVertices, pyramidIndices, 0, recursionDepth );
-	Tessellation( nodes[2], nodes[3], nodes[5], pyramidVertices, pyramidIndices, 0, recursionDepth );
-	Tessellation( nodes[3], nodes[0], nodes[5], pyramidVertices, pyramidIndices, 0, recursionDepth );
-		
+	for( unsigned i=0; i<nodes.size(); i+=3 )
+	{
+		Tessellation( nodes[i], nodes[i+1], nodes[i+2], pyramidVertices, pyramidIndices, 0, recursionDepth );
+	}		
 }
 
 Vertex SumWithWeight( const Vertex &v1, const Vertex &v2, float weight )
 {
-	DWORD r, g, b, a;
-	DWORD color1 = v1.color;
-	DWORD color2 = v2.color;
-	a = static_cast<DWORD>( (color1 & 0xff000000)/0x1000000 * weight +
-		(color2 & 0xff000000)/0x1000000 * (1-weight) );
-	r = static_cast<DWORD>( (color1 & 0x00ff0000)/0x10000 * weight +
-		(color2 & 0x00ff0000)/0x10000 * (1-weight) );
-	g = static_cast<DWORD>( (color1 & 0x0000ff00)/0x100 * weight +
-		(color2 & 0x0000ff00)/0x100 * (1-weight) );
-	b = static_cast<DWORD>( (color1 & 0x000000ff) * weight +
-		(color2 & 0x000000ff) * (1-weight) );
+	return Vertex( v1.position*weight+v2.position*(1-weight),
+				   v1.normal*weight+v2.normal*(1-weight) );
 
-	return Vertex(	(v1.x*weight+v2.x*(1-weight)),
-					(v1.y*weight+v2.y*(1-weight)),
-					(v1.z*weight+v2.z*(1-weight)),
-#ifndef RANDOM_COLORS
-					D3DCOLOR_ARGB(a, r, g, b) );
-#else
-					Colors::Random() );
-#endif
 }
