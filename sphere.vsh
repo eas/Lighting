@@ -18,6 +18,10 @@ mul r2, r6, c5.yyyy
 mad r6, v1, c5.xxxx, r2	; new normal
 mov r6.w, c100.w
 
+dp3 r0, r6, r6
+rsq r0.x, r0.x
+mul r6, r6, r0.xxxx		; normalize
+
 mul r2, r2, c4.xxxx
 mad r9, v0, c5.xxxx, r2	;new position
 mov r9.w, c101.w
