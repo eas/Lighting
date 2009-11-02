@@ -13,6 +13,10 @@ public:
 	void SetPositionMatrix(const D3DXMATRIX& positionMatrix);
 	void SetViewMatrix(const D3DXMATRIX& viewMatrix);
 	void SetProjectiveMatrix(const D3DXMATRIX& projectionMatrix);
+	D3DXMATRIX GetPostionMatrix() const
+	{
+		return positionMatrix_;
+	}
 	virtual ~Sphere();
 private:
 	Sphere(const Sphere&);

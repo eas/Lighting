@@ -104,7 +104,7 @@ void Cylinder::Draw(const Lights& lights)
 	vertexDeclaration_.Use();
 	shader_.Use();
 	shader_.SetMatrix( projectiveMatrix_*viewMatrix_, 0 );
-	shader_.SetMatrix( RotateZMatrix( angle )*positionMatrix_, 4 );
+	shader_.SetMatrix( positionMatrix_*RotateZMatrix( angle ), 4 );
 	shader_.SetMatrix( positionMatrix_, 8);
 	shader_.SetConstantF(64, material_, 4);
 	lights.SetLights(shader_);

@@ -22,12 +22,14 @@ const unsigned nPointsPerCircle = 32;
 const unsigned nPointsPerGeneratrix = 16;
 const float Height = 50.0f;
 const float Radius = 8.0f;
-const float CylinderFreq = 0.0f;
+const float CylinderFreq = 1.0f;
 const float MaxAngle = D3DX_PI / 4;
 
 const float SphereRadius = 8.0f;
 const unsigned TesselationLevel = 5;
 const float SphereFreq = 1.0f;
+
+const float AngleStep = D3DX_PI / 8;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
@@ -79,7 +81,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	Plain plain( graphicDevice,
 				 Colors::Black, Colors::Black, Colors::White, Colors::White );
-	plain.SetPositionMatrix( UnityMatrix() );
 	plain.SetViewMatrix( viewMatrix );
 	plain.SetProjectiveMatrix( projectiveMatrix );
 	
@@ -178,6 +179,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case VK_PRIOR:
 			case 'W':
 				pSpectatorCoords->DecR();
+				break;
+			case 'T':
+				cylinder->SetPositionMatrix( cylinder->GetPostionMatrix() * RotateYMatrix( AngleStep ) );
+				break;
+			case 'G':
+				cylinder->SetPositionMatrix( cylinder->GetPostionMatrix() * RotateYMatrix( -AngleStep ) );
+				break;
+			case 'Y':
+				sphere->SetPositionMatrix( sphere->GetPostionMatrix() * RotateYMatrix( AngleStep ) );
+				break;
+			case 'H':
+				sphere->SetPositionMatrix( sphere->GetPostionMatrix() * RotateYMatrix( -AngleStep ) );
 				break;
 			default:
 				return DefWindowProc(hWnd, message, wParam, lParam);

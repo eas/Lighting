@@ -76,7 +76,6 @@ Plain::Plain( D3D::GraphicDevice &device,
 	nPrimitives_ = indices.size()/3;
 	vertexBuffer_.SetVertices( &vertices[0], vertices.size() );
 	indexBuffer_.SetIndices( &indices[0], indices.size() );
-	SetPositionMatrix( UnityMatrix() );
 	SetViewMatrix( UnityMatrix() );
 	SetProjectiveMatrix( UnityMatrix() );
 }
@@ -98,10 +97,7 @@ void Plain::Draw(const Lights& lights)
 
 	device_->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, nVertices_, 0, nPrimitives_);
 }
-void Plain::SetPositionMatrix(const D3DXMATRIX& positionMatrix)
-{
-	positionMatrix_ = positionMatrix;
-}
+
 void Plain::SetViewMatrix(const D3DXMATRIX& viewMatrix)
 {
 	viewMatrix_ = viewMatrix;

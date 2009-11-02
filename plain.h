@@ -15,7 +15,6 @@ public:
 	Plain( D3D::GraphicDevice& device,
 		   D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular );
 	void Draw(const Lights& lights);
-	void SetPositionMatrix(const D3DXMATRIX& positionMatrix);
 	void SetViewMatrix(const D3DXMATRIX& viewMatrix);
 	void SetProjectiveMatrix(const D3DXMATRIX& projectionMatrix);
 
@@ -27,7 +26,7 @@ private:
 	D3D::IndexBuffer indexBuffer_;
 	D3D::Shader shader_;
 
-	D3DXMATRIX positionMatrix_, viewMatrix_, projectiveMatrix_;
+	D3DXMATRIX viewMatrix_, projectiveMatrix_;
 	unsigned nVertices_;
 	unsigned nPrimitives_;
 	const Material material_;

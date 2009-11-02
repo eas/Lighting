@@ -18,6 +18,10 @@
 #include <tchar.h>
 #define _CRTDBG_MAP_ALLOC
 #define _CRTDBG_MAP_ALLOC_NEW
+#pragma warning( disable : 4005 )
+#pragma warning( disable : 4985 )
 #include <crtdbg.h>
+#pragma warning( default : 4005 )
+#pragma warning( default : 4985 )
 
 // TODO: reference additional headers your program requires here
