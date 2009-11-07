@@ -173,16 +173,15 @@ rcp r11, r11.x ; attenuation
 dp3 r6, c89, r9;	(direct, spot_direct)
 
 ;must change attenuation if position is between inner and outter angles
-;can use r2, r3, r4, r8; r6 = cosf^2(fi); c84 - angles z, w = alpha, beta
-sge r2, r6, c88.zzzz
-slt r3, r6, c88.zzzz
-sge r4, r6, c88.wwww
-mul r3, r3, r4
-rsq r6, r6.x
-rcp r6, r6.x
+;can use r2, r3, r4, r8; r6 = cosf(phi); c84 - angles z, w = alpha, beta
+sge r2, r6, c88.zzzz	; phi < innerAngle
+slt r3, r6, c88.zzzz	; phi > innerAngle
+sge r4, r6, c88.wwww	; phi < outerAngle
+mul r3, r3, r4			; innerAngle < phi < outerAngle
 mad r4, r6, c88.yyyy, c88.xxxx
 mad r2, r4, r3, r2
 mul r11, r2, r11
+
 
 dp3 r2, -r9, r7		;(-direct, n)
 sge r3, r2, c100	; 0 if we can't light this vertex because of normal

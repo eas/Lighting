@@ -27,6 +27,10 @@ public:
 
 	virtual ~Cylinder();
 private:
+	Cylinder(const Cylinder&);
+	Cylinder& operator=(const Cylinder&);
+
+private:
 	D3D::GraphicDevice device_;
 	D3D::VertexDeclaration vertexDeclaration_;
 	D3D::VertexBuffer<Vertex> vertexBuffer_;

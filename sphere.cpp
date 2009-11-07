@@ -189,6 +189,9 @@ void InitVertices(	unsigned recursionDepth, float edgeSize,
 					Vertices &pyramidVertices,
 					Indices &pyramidIndices)
 {
+	assert( 0 == pyramidIndices.size() );
+	assert( 0 == pyramidVertices.size() );
+
 	std::vector<Node> nodes;
 
 	const float alpha = atanf( sqrtf(2.0f) );

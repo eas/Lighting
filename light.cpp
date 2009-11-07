@@ -35,12 +35,12 @@ SpotLight::SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, con
 	 specularConst_(exp, exp, exp, exp)
 
 {
-	assert( innerAngle <= outerAngle );
+	assert( innerAngle < outerAngle );
 	assert( outerAngle < D3DX_PI / 2 );
 	assert( innerAngle > 0 );
 
 	D3DXVec4Normalize(&direct_, &direct_);
 	float alpha = cosf(innerAngle);
 	float beta = cosf(outerAngle);
-	angles_ = D3DXVECTOR4( -beta/(alpha-beta), 1/(alpha - beta), alpha*alpha, beta*beta );
+	angles_ = D3DXVECTOR4( -beta/(alpha-beta), 1/(alpha - beta), alpha, beta );
 }
