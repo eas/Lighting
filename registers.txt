@@ -22,5 +22,9 @@ Directional
 		c74 - specular
 Point
 	c76 - c80
+		c76	position
+		c77	diffuse
+		c78	specular
+		c79	attenuation
 Spot
 	c84 - c90

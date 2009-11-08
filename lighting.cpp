@@ -96,11 +96,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 									   Colors::Black,
 									   Colors::Black,
 									   1.0f );
-	//D3DXCOLOR color(0.1f, 0.9f, 0.9f, 0.0f);
-	PointLight pointLight( D3DXVECTOR3(1.0f, -0.820f, 0.2f),
-						   Colors::Black,
-						   Colors::Black,
-						   0.4f, 0.00f, 1.3f );
+	PointLight pointLight( D3DXVECTOR3(5.0f, 0.0f, 0.0f),
+						   Colors::Red,
+						   Colors::Green,
+						   1.0f, 0.00f, 0.0f );
 	SpotLight spotLight( D3DXVECTOR3(20.0f, 0.0f, 0.0f),
 						 Colors::Black,
 						 Colors::Black,
