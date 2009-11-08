@@ -132,6 +132,7 @@ add r0, r0, c65
 	rcp r11, r11.x		; attenuation
 
 	;must change attenuation if position is between inner and outter angles
+	dp3 r6, c89, r9;	(direct, spot_direct)
 	sge r2, r6, c88.zzzz	; phi < innerAngle
 	slt r3, r6, c88.zzzz	; phi > innerAngle
 	sge r4, r6, c88.wwww	; phi < outerAngle
@@ -165,8 +166,6 @@ add r0, r0, c65
 	mad r0, r4, r3, r0	; r0+=directional
 	
 ;---------End Spot Light--------------------------------
-
-
 
 dp3 r5, r1, r7		; (eye-vertex, n)
 sge r5, r5, c100	; 1 if we can see light

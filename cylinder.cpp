@@ -68,15 +68,17 @@ void InitVertices(	Vertices& vertices, Indices& indices,
 
 Cylinder::Cylinder(unsigned int nPointsPerCircle, unsigned int nPointsPerGeneratrix, 
 				   float height, float Radius, D3D::GraphicDevice &device, float freq, float maxAngle,
-				   D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular)
+				   D3DXCOLOR ambient, D3DXCOLOR emissive,
+				   D3DXCOLOR diffuse, D3DXCOLOR specular,
+				   float specularExp)
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
 	  indexBuffer_(device),
-	  shader_(device, L"sphere.vsh"),
+	  shader_(device, L"cylinder.vsh"),
 	  freq_(freq),
 	  maxAngle_(maxAngle),
-	  material_(ambient, emissive, diffuse, specular)
+	  material_(ambient, emissive, diffuse, specular, specularExp)
 {
 	Vertices vertices;
 	Indices indices;
@@ -107,6 +109,7 @@ void Cylinder::Draw(const Lights& lights)
 	shader_.SetMatrix( positionMatrix_*RotateZMatrix( angle ), 4 );
 	shader_.SetMatrix( positionMatrix_, 8);
 	shader_.SetConstantF(64, material_, 4);
+	shader_.SetConstantF(63, material_.specularExp);
 	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
 

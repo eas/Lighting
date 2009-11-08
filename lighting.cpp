@@ -20,10 +20,10 @@ const float BackClippingPlane = 1.0e13f;
 
 const unsigned nPointsPerCircle = 32;
 const unsigned nPointsPerGeneratrix = 16;
-const float Height = 2.0f;
-const float Radius = 0.7f;
-const float CylinderFreq = 0.020f;
-const float MaxAngle = D3DX_PI / 2;
+const float Height = 13.0f;
+const float Radius = 4.0f;
+const float CylinderFreq = 1.00f;
+const float MaxAngle = D3DX_PI / 4;
 
 const float SphereRadius = 8.0f;
 const unsigned TesselationLevel = 5;
@@ -38,9 +38,9 @@ void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
 	cylinder; plane; sphere;
 
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
-	//cylinder.Draw(lights);
-	//sphere.Draw(lights);
-	plane.Draw(lights);
+	cylinder.Draw(lights);
+	sphere.Draw(lights);
+	//plane.Draw(lights);
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -66,7 +66,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	//graphicDevice.SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 	graphicDevice.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
 
-	Helper::SpectatorCoords spectatorCoords( 3.0f, D3DX_PI / 2, -D3DX_PI / 2 );
+	Helper::SpectatorCoords spectatorCoords( 40.0f, D3DX_PI / 2, -0*D3DX_PI / 2 );
 
 	D3DXMATRIX viewMatrix = ViewMatrix( spectatorCoords.GetCartesianCoords(),
 										D3DXVECTOR3(0.0f, 0.0f, 0.0f),
@@ -74,38 +74,38 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	D3DXMATRIX projectiveMatrix = ProjectiveMatrix( FrontClippingPlane, BackClippingPlane );
 
 	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, CylinderFreq, MaxAngle,
-					  Colors::White, Colors::Black, Colors::White, Colors::White);
+					  Colors::White, Colors::Black, Colors::White, Colors::White, 1.0f);
 	cylinder.SetPositionMatrix( TranslationMatrix(0, -Height/2, 0) );
 	cylinder.SetViewMatrix( viewMatrix );
 	cylinder.SetProjectiveMatrix( projectiveMatrix );
 
 	Plane plane( graphicDevice,
 				 Colors::Black, Colors::Black, Colors::White, Colors::White,
-				 100.0f );
+				 1.0f );
 	plane.SetViewMatrix( viewMatrix );
 	plane.SetProjectiveMatrix( projectiveMatrix );
 	
 	Sphere sphere( SphereRadius, TesselationLevel, graphicDevice, SphereFreq,
-				   Colors::White, Colors::Black, Colors::White, Colors::White );
+				   Colors::White, Colors::Black, Colors::White, Colors::White, 1.0f );
 	sphere.SetPositionMatrix( TranslationMatrix( -2*SphereRadius - 2*Radius, 0.0f, 0.0f ) );
 	sphere.SetViewMatrix( viewMatrix );
 	sphere.SetProjectiveMatrix( projectiveMatrix );
 
 	D3DXCOLOR ambient = Colors::Black;
-	DirectionalLight directionalLight( D3DXVECTOR3(-1.0f, 0.0f, 0.0f),
+	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, -1.0f),
 									   Colors::Black,
-									   Colors::Black,
+									   Colors::Blue,
 									   1.0f );
-	PointLight pointLight( D3DXVECTOR3(5.0f, 0.0f, 0.0f),
+	PointLight pointLight( D3DXVECTOR3(8.0f, -2.0f, 0.0f),
 						   Colors::Red,
-						   Colors::Green,
+						   Colors::Black,
 						   1.0f, 0.00f, 0.0f );
-	SpotLight spotLight( D3DXVECTOR3(20.0f, 0.0f, 0.0f),
-						 Colors::Black,
+	SpotLight spotLight( D3DXVECTOR3(-20.0f, 0.0f, 0.0f),
+						 Colors::Green,
 						 Colors::Black,
 						 1.0f, 0.0f, 0.000f,
 						 6*D3DX_PI/64, 16*D3DX_PI/64,
-						 D3DXVECTOR3(-1.0f, 0.0f, 0.0f) );
+						 D3DXVECTOR3(1.0f, 0.0f, 0.0f) );
 
 	Lights lights(ambient, directionalLight, pointLight, spotLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );

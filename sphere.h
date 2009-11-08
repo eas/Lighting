@@ -8,7 +8,9 @@ public:
 	struct Vertex;
 
 	Sphere( float radius, unsigned tesselationLevel, D3D::GraphicDevice device, float freq,
-			D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular );
+			D3DXCOLOR ambient, D3DXCOLOR emissive,
+			D3DXCOLOR diffuse, D3DXCOLOR specular,
+			float specularExp );
 	void Draw(const Lights& lights);
 	void SetPositionMatrix(const D3DXMATRIX& positionMatrix);
 	void SetViewMatrix(const D3DXMATRIX& viewMatrix);

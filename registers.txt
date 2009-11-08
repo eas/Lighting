@@ -28,3 +28,9 @@ Point
 		c79	attenuation
 Spot
 	c84 - c90
+	c84	position
+	c85	diffuse
+	c86	specular
+	c87	attenuation
+	c88	angles
+	c89	direc

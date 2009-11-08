@@ -33,6 +33,7 @@ m4x4 r7, r6, c6			; world matrix
 m4x4 oPos, r10, c0		; view matrix
 
 ; c64 - material
+	; c63	specularExp
 	; c64	ambient
 	; c65	emissive
 	; c66	diffuse
@@ -42,125 +43,90 @@ m4x4 oPos, r10, c0		; view matrix
 ; c69 - Eye
 
 ;--------------------------------Calculating Color-------------------------------------------------
-; r1 <- v = eye - r10, |l| = 1
+; r1 <- l = eye - v, |l| = 1, can't change
 add r1, c69, -r10
 dp3 r2, r1, r1
 rsq r2, r2.x
 mul r1, r1, r2
-;4 instructions are used here, 30 total
 
-dp3 r5, r7, r1		; (eye-vertex, n)
-sge r5, r5, c100	; 1 if we can see light
-;2 instructions are used here, 32 total
 
 ;Ambient and emissive
 mov r0, c64
 mul r0, r0, c68
-mul r0, r0, r5		; 0 if we can't see light( we are behind the triangle )
 add r0, r0, c65
 
-
-
-;CAN'T CHANGE: r1 = eye-vertex, r5 = 1 if we can see light(using n), r10 = vertex, r7 = normal
-;r0 - current result
 ;*********Directional Light
-	; c72	direct
-	; c73	diffuse
-	; c74	specular
-	; c75	specularConst
+		; c72	direct
+		; c73	diffuse
+		; c74	specular
 
-dp3 r2, -c72, r7	;(-direct, n)
+	dp3 r2, -c72, r7	;(-direct, n) = cos(theta), can't change
 
-sge r3, r2, c100	; 0 if we can't light this vertex
-max r2, r2, c100
+	;diffuse
+	mul r4, r2, c73
+	mul r3, r4, c66		; diffuse
+
+	;specular
+	add r4, r2, r2		;(-direct, n)*2 = 2*cos(theta)
+	mad r4, r4, r7, c72	; r from Fong = specular
+
+	dp3 r4, r1, r4		; ((eye-vertex) , (specular)) = cos(hi)
+	max r4, r4, c100	; if angle between eye-vertex and specular more than pi/2
+
+	mov r4.w, c63.x
+	lit r4, r4			
+	mov r4, r4.zzzz		; pow(r4, c63.x)
+
+	mul r4, r4, c67
+	mad r3, r4, c74, r3	; specular + diffuse
+
+	sge r4, r2, c100	; 0 if we can't light this vertex
+	mad r0, r4, r3, r0	; r0+=directional
+;*****End Directional Light
 
 
-
-;diffuse
-mul r4, r2, c73
-mul r4, r4, r5
-mad r0, r4, c66, r0
-
-
-
-;specular
-add r4, r2, r2	;(-direct, n)*2
-mad r4, r4, r7, c72	; r from Fong
-
-mul r4, r3, r4	; if we can't light this vertex
-mul r4, r5, r4	; if we can't see specluar light because we are on another side( behind triangle )
-
-dp3 r4, r4, r1	; ((eye-vertex) , (specular))
-sge r6, r4, c100
-mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
-
-mov r3, r4
-mov r3.w, c75.x
-lit r3, r3
-mov r4, r3.zzzz
-
-mul r4, r4, c67
-mad r0, r4, c74, r0
-
-;CAN'T CHANGE: r1 = eye-vertex, r5 = 1 if we can see light(using n), r10 = vertex, r7 = normal
-;r0 - current result
 ;----------------Point Light--------------------------------
-	; c76	position
-	; c77	diffuse
-	; c78	specular
-	; c79	attenuation
-	; c80	specularConst
-add r9, r10, -c76 ; light_direct
+		; c76	position
+		; c77	diffuse
+		; c78	specular
+		; c79	attenuation
+	add r9, r10, -c76 ; light_direct
 
-dp3 r3, r9, r9 ; distance^2
-mul r4, r3, c79.zzzz
-rsq r6, r3.x
-mul r9, r9, r6 ; normalize direct
-mul r3, r3, r6 ; distance
-mad r4, c79.yyyy, r3, r4
-add r11, r4, c79.xxxx
-rcp r11, r11.x ; attenuation
-;can use r4, r3
-
-dp3 r2, -r9, r7	;(-light_direct, n)
-sge r3, r2, c100	; 0 if we can't light this vertex
-max r2, r2, c100
-
-;diffuse
-mul r4, r2, c77
-mul r4, r4, r5
-mul r4, r4, r11
-mad r0, r4, c66, r0
-
-;specular
-add r4, r2, r2	;(-direct, n)*2
-mad r4, r4, r7, r9	; r from Fong, specular light
-
-mul r4, r3, r4	; if we can't light this vertex
-mul r4, r5, r4	; if we can't see specluar light because we are on another side( behind triangle )
-
-dp3 r4, r4, r1	; ((eye-vertex) , (specular))
-sge r6, r4, c100
-mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
-
-;mul r4, r4, r4
-;mul r4, r4, r4
-;mul r4, r4, r4
-;mul r4, r4, r4
-;mul r4, r4, r4
-mov r3, r4
-mov r3.w, c80.x
-lit r3, r3
-mov r4, r3.zzzz
-;mov r4, c101
+	dp3 r3, r9, r9 ; distance^2
+	rsq r11, r3.x
+	mul r9, r9, r11
+	dst r11, r3, r11	; r11 = ( 1, d, d^2, 1/d)
+	dp3 r11, r11, c79	
+	rcp r11, r11.x		; attenuation
 
 
-mul r4, r4, c67
-mul r4, r4, r11
-mad r0, r4, c78, r0
+	dp3 r2, -r9, r7	;(-light_direct, n)
 
-;CAN'T CHANGE: r1 = eye-vertex, r5 = 1 if we can see light(using n), r10 = vertex, r7 = normal
-;r0 - current result
+	;diffuse
+	mul r4, r2, c77
+	mul r3, r4, c66
+
+	;specular
+	add r4, r2, r2	;(-direct, n)*2
+	mad r4, r4, r7, r9	; r from Fong, specular light
+
+	dp3 r4, r4, r1	; ((eye-vertex) , (specular))
+	max r4, r4, c100	; if angle between eye-vertex and specular more than pi/2
+
+	mov r4.w, c63.x
+	lit r4, r4			
+	mov r4, r4.zzzz		; pow(r4, c63.x)
+
+	mul r4, r4, c67
+	mad r3, r4, c78, r3
+	mul r3, r3, r11		; attenuation
+	
+	sge r4, r2, c100	; 0 if we can't light this vertex
+	mad r0, r4, r3, r0	; r0+=directional
+	
+;---------End Point Light--------------------------------
+
+
 ;----------------Spot Light--------------------------------
 	; c84	position
 	; c85	diffuse
@@ -168,61 +134,51 @@ mad r0, r4, c78, r0
 	; c87	attenuation
 	; c88	angles
 	; c89	direct
-	; c90	specularConst
-add r9, r10, -c84 ; direct( vertex-position )
+	add r9, r10, -c84 ; light_direct
 
-dp3 r3, r9, r9 ; distance^2
-mul r4, r3, c87.zzzz
-rsq r6, r3.x
-mul r9, r9, r6 ; normalize direct
-mul r3, r3, r6 ; distance
-mad r4, c87.yyyy, r3, r4
-add r11, r4, c87.xxxx
-rcp r11, r11.x ; attenuation
-;can use r4, r3	
+	dp3 r3, r9, r9 ; distance^2
+	rsq r11, r3.x
+	mul r9, r9, r11
+	dst r11, r3, r11	; r11 = ( 1, d, d^2, 1/d)
+	dp3 r11, r11, c79	
+	rcp r11, r11.x		; attenuation
 
-dp3 r6, c89, r9;	(direct, spot_direct)
+	;must change attenuation if position is between inner and outter angles
+	dp3 r6, c89, r9;	(direct, spot_direct)
+	sge r2, r6, c88.zzzz	; phi < innerAngle
+	slt r3, r6, c88.zzzz	; phi > innerAngle
+	sge r4, r6, c88.wwww	; phi < outerAngle
+	mul r3, r3, r4			; innerAngle < phi < outerAngle
+	mad r4, r6, c88.yyyy, c88.xxxx
+	mad r2, r4, r3, r2
+	mul r11, r2, r11
 
-;must change attenuation if position is between inner and outter angles
-;can use r2, r3, r4, r8; r6 = cosf(phi); c84 - angles z, w = alpha, beta
-sge r2, r6, c88.zzzz	; phi < innerAngle
-slt r3, r6, c88.zzzz	; phi > innerAngle
-sge r4, r6, c88.wwww	; phi < outerAngle
-mul r3, r3, r4			; innerAngle < phi < outerAngle
-mad r4, r6, c88.yyyy, c88.xxxx
-mad r2, r4, r3, r2
-mul r11, r2, r11
+	dp3 r2, -r9, r7	;(-light_direct, n)
 
+	;diffuse
+	mul r4, r2, c85
+	mul r3, r4, c66
 
-dp3 r2, -r9, r7		;(-direct, n)
-sge r3, r2, c100	; 0 if we can't light this vertex because of normal
-mul r2, r2, r3
+	;specular
+	add r4, r2, r2	;(-direct, n)*2
+	mad r4, r4, r7, r9	; r from Fong, specular light
 
-;diffuse
-mul r4, r2, c85
-mul r4, r4, r5
-mul r4, r4, r11
-mad r0, r4, c66, r0
+	dp3 r4, r4, r1	; ((eye-vertex) , (specular))
+	max r4, r4, c100	; if angle between eye-vertex and specular more than pi/2
 
-;specular
-add r4, r2, r2	;(-direct, n)*2
-mad r4, r4, r7, r9	; r from Fong
+	mov r4.w, c63.x
+	lit r4, r4			
+	mov r4, r4.zzzz		; pow(r4, c63.x)
 
-mul r4, r3, r4	; if we can't light this vertex
-mul r4, r5, r4	; if we can't see specluar light because we are on another side( behind triangle )
+	mul r4, r4, c67
+	mad r3, r4, c86, r3
+	mul r3, r3, r11		; attenuation
+	
+	sge r4, r2, c100	; 0 if we can't light this vertex
+	mad r0, r4, r3, r0	; r0+=directional
+	
+;---------End Spot Light--------------------------------
 
-dp3 r4, r4, r1	; ((eye-vertex) , (specular))
-sge r6, r4, c100
-mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
-
-mov r3, r4
-mov r3.w, c90.x
-lit r3, r3
-mov r4, r3.zzzz
-
-
-mul r4, r4, c67
-mul r4, r4, r11
-mad r0, r4, c86, r0
-
-mov oD0, r0
+dp3 r5, r1, r7		; (eye-vertex, n)
+sge r5, r5, c100	; 1 if we can see light
+mul oD0, r5, r0		; if we can't see light
