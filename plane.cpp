@@ -92,9 +92,7 @@ void Plane::Draw(const Lights& lights)
 	shader_.Use();
 
 	shader_.SetMatrix( projectiveMatrix_*viewMatrix_, 0 );
-	shader_.SetConstantF(64, material_, 4);
-	shader_.SetConstantF(63, material_.specularExp);
-
+	material_.SetMaterial(shader_);
 	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
 

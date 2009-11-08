@@ -1,6 +1,12 @@
 #include "stdafx.h"
 #include "light.h"
 
+void Material::SetMaterial(D3D::Shader &shader) const
+{
+	shader.SetConstantF(64, ambient, 4);
+	shader.SetConstantF(63, specularExp);
+}
+
 Lights::Lights(const D3DXCOLOR& ambient, const DirectionalLight& directionalLight,
 			   const PointLight& pointLight, const SpotLight& spotLight)
 	:ambient_(ambient), directionalLight_(directionalLight), pointLight_(pointLight), spotLight_(spotLight)

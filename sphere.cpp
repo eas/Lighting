@@ -71,8 +71,7 @@ void Sphere::Draw(const Lights& lights)
 	shader_.SetMatrix( positionMatrix_, 6 );
 	shader_.SetConstantF(4, radius_);
 	shader_.SetConstantF(5, D3DXVECTOR4(weight, 1-weight, 0.0f, 0.0f), 1);
-	shader_.SetConstantF(64, material_, 4);
-	shader_.SetConstantF(63, material_.specularExp);
+	material_.SetMaterial(shader_);
 	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
 

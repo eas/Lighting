@@ -1,14 +1,9 @@
 #pragma once
 #include "graphics.h"
 
-struct Material
+class Material
 {
-	D3DXCOLOR ambient;
-	D3DXCOLOR emissive;
-	D3DXCOLOR diffuse;
-	D3DXCOLOR specular;
-	float specularExp;
-	
+public:
 	Material( D3DXCOLOR ambient, D3DXCOLOR emissive,
 			  D3DXCOLOR diffuse, D3DXCOLOR specular, float specularExp = 1.0f )
 		  : ambient(ambient),
@@ -18,14 +13,14 @@ struct Material
 			specularExp(specularExp)
 	{
 	}
-	operator float*()
-	{
-		return ambient;
-	}
-	operator const float*() const
-	{
-		return ambient;
-	}
+	void SetMaterial(D3D::Shader& shader) const;
+
+private:
+	D3DXCOLOR ambient;
+	D3DXCOLOR emissive;
+	D3DXCOLOR diffuse;
+	D3DXCOLOR specular;
+	float specularExp;
 };
 
 struct DirectionalLight
