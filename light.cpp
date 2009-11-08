@@ -20,20 +20,18 @@ void Lights::SetEye(const D3DXVECTOR3 &eye)
 	eye_ = D3DXVECTOR4( eye, 0 );
 }
 PointLight::PointLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
-						float a, float b, float c, float exp )
+						float a, float b, float c )
 	:position_(position, 0.0f), diffuse_(diffuse), specular_(specular),
-	 attenuation_(a, b, c, 0.0f), specularConst_(exp, exp, exp, exp)
+	 attenuation_(a, b, c, 0.0f)
 {
 }
 
 SpotLight::SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
 					  float a, float b, float c, float innerAngle, float outerAngle,
-					  const D3DXVECTOR3& direct, float exp )
+					  const D3DXVECTOR3& direct )
 	:position_(position, 0.0f), diffuse_(diffuse), specular_(specular),
 	 attenuation_(a, b, c, 0.0f),
-	 direct_(direct, 0),
-	 specularConst_(exp, exp, exp, exp)
-
+	 direct_(direct, 0)
 {
 	assert( innerAngle < outerAngle );
 	assert( outerAngle < D3DX_PI / 2 );

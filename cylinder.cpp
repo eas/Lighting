@@ -73,7 +73,7 @@ Cylinder::Cylinder(unsigned int nPointsPerCircle, unsigned int nPointsPerGenerat
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
 	  indexBuffer_(device),
-	  shader_(device, L"cylinder.vsh"),
+	  shader_(device, L"sphere.vsh"),
 	  freq_(freq),
 	  maxAngle_(maxAngle),
 	  material_(ambient, emissive, diffuse, specular)

@@ -109,13 +109,10 @@ mad r0, r4, c74, r0
 add r9, r10, -c76 ; light_direct
 
 dp3 r3, r9, r9 ; distance^2
-mul r4, r3, c79.zzzz
-rsq r6, r3.x
-mul r9, r9, r6 ; normalize direct
-mul r3, r3, r6 ; distance
-mad r4, c79.yyyy, r3, r4
-add r11, r4, c79.xxxx
-rcp r11, r11.x ; attenuation
+rsq r11, r3.x
+dst r11, r3, r11	; r11 = ( 1, d, d^2, 1/d)
+dp3 r11, r11, c79	
+rcp r11, r11.x		; attenuation
 ;can use r4, r3
 
 dp3 r2, -r9, r7	;(-light_direct, n)
@@ -139,11 +136,6 @@ dp3 r4, r4, r1	; ((eye-vertex) , (specular))
 sge r6, r4, c100
 mul r4, r4, r6	; if angle between eye-vertex and specular more than pi/2
 
-;mul r4, r4, r4
-;mul r4, r4, r4
-;mul r4, r4, r4
-;mul r4, r4, r4
-;mul r4, r4, r4
 mov r3, r4
 mov r3.w, c80.x
 lit r3, r3

@@ -7,18 +7,20 @@
 
 
 
-class Plain
+class Plane
 {
 public:
 	struct Vertex;
 
-	Plain( D3D::GraphicDevice& device,
-		   D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular );
+	Plane( D3D::GraphicDevice& device,
+		   D3DXCOLOR ambient, D3DXCOLOR emissive,
+		   D3DXCOLOR diffuse, D3DXCOLOR specular,
+		   float specularExp );
 	void Draw(const Lights& lights);
 	void SetViewMatrix(const D3DXMATRIX& viewMatrix);
 	void SetProjectiveMatrix(const D3DXMATRIX& projectionMatrix);
 
-	virtual ~Plain();
+	virtual ~Plane();
 private:
 	D3D::GraphicDevice device_;
 	D3D::VertexDeclaration vertexDeclaration_;
@@ -32,7 +34,7 @@ private:
 	const Material material_;
 };
 
-struct Plain::Vertex
+struct Plane::Vertex
 {
 	D3DXVECTOR3 position;
 	D3DXVECTOR3 normal;

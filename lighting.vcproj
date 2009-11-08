@@ -248,18 +248,18 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="plain"
+			Name="plane"
 			>
 			<File
-				RelativePath=".\plain.cpp"
+				RelativePath=".\plane.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\plain.h"
+				RelativePath=".\plane.h"
 				>
 			</File>
 			<File
-				RelativePath=".\plain.vsh"
+				RelativePath=".\plane.vsh"
 				>
 			</File>
 		</Filter>

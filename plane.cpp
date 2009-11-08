@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "plain.h"
+#include "plane.h"
 
 
 #include "graphics.h"
@@ -18,7 +18,7 @@
 #endif
 
 
-typedef Plain::Vertex Vertex;
+typedef Plane::Vertex Vertex;
 typedef std::vector<Vertex> Vertices;
 typedef std::vector<D3D::Index> Indices;
 
@@ -59,14 +59,16 @@ void InitVertices( Vertices& vertices, Indices& indices )
 		}
 	}
 }
-Plain::Plain( D3D::GraphicDevice &device,
-			  D3DXCOLOR ambient, D3DXCOLOR emissive, D3DXCOLOR diffuse, D3DXCOLOR specular)
+Plane::Plane( D3D::GraphicDevice &device,
+			  D3DXCOLOR ambient, D3DXCOLOR emissive,
+			  D3DXCOLOR diffuse, D3DXCOLOR specular,
+			  float specularExp)
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
 	  indexBuffer_(device),
-	  shader_(device, L"plain.vsh"),
-	  material_(ambient, emissive, diffuse, specular)
+	  shader_(device, L"plane.vsh"),
+	  material_(ambient, emissive, diffuse, specular, specularExp)
 {
 	Vertices vertices;
 	Indices indices;
@@ -79,10 +81,10 @@ Plain::Plain( D3D::GraphicDevice &device,
 	SetViewMatrix( UnityMatrix() );
 	SetProjectiveMatrix( UnityMatrix() );
 }
-Plain::~Plain()
+Plane::~Plane()
 {
 }
-void Plain::Draw(const Lights& lights)
+void Plane::Draw(const Lights& lights)
 {
 	vertexBuffer_.Use(0,0);
 	indexBuffer_.Use();
@@ -91,6 +93,7 @@ void Plain::Draw(const Lights& lights)
 
 	shader_.SetMatrix( projectiveMatrix_*viewMatrix_, 0 );
 	shader_.SetConstantF(64, material_, 4);
+	shader_.SetConstantF(63, material_.specularExp);
 
 	lights.SetLights(shader_);
 	vertexDeclaration_.Use();
@@ -98,11 +101,11 @@ void Plain::Draw(const Lights& lights)
 	device_->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, nVertices_, 0, nPrimitives_);
 }
 
-void Plain::SetViewMatrix(const D3DXMATRIX& viewMatrix)
+void Plane::SetViewMatrix(const D3DXMATRIX& viewMatrix)
 {
 	viewMatrix_ = viewMatrix;
 }
-void Plain::SetProjectiveMatrix(const D3DXMATRIX& projectiveMatrix)
+void Plane::SetProjectiveMatrix(const D3DXMATRIX& projectiveMatrix)
 {
 	projectiveMatrix_ = projectiveMatrix;
 }
