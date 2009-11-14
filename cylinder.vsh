@@ -14,7 +14,7 @@ m4x4 r1, v0, c8
 mul r10, r10, v2.xxxx
 mad r10, r1, v2.yyyy, r10
 m4x4 oPos, r10, c0
-;14 instructions are used here
+
 
 ;--------------------------------Calculating Normal------------------------------------------------
 ;r7 <-new normal
@@ -24,7 +24,11 @@ m4x4 r7, r5, c4
 m4x4 r6, r5, c8
 mul r7, r7, v2.xxxx
 mad r7, r6, v2.yyyy, r7
-;12 instructions are used here, 26 total
+
+;--normalize--
+mul r6, r7, r7
+rsq r6, r6.x
+mul r7, r7, r6
 
 
 
@@ -141,13 +145,10 @@ add r0, r0, c65
 
 	;must change attenuation if position is between inner and outter angles
 	dp3 r6, c89, r9;	(direct, spot_direct)
-	sge r2, r6, c88.zzzz	; phi < innerAngle
-	slt r3, r6, c88.zzzz	; phi > innerAngle
-	sge r4, r6, c88.wwww	; phi < outerAngle
-	mul r3, r3, r4			; innerAngle < phi < outerAngle
 	mad r4, r6, c88.yyyy, c88.xxxx
-	mad r2, r4, r3, r2
-	mul r11, r2, r11
+	max r4, r4, c100
+	min r4, r4, c101
+	mul r11, r4, r11
 
 	dp3 r2, -r9, r7	;(-light_direct, n)
 

@@ -38,9 +38,9 @@ void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
 	cylinder; plane; sphere;
 
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
-	cylinder.Draw(lights);
-	sphere.Draw(lights);
-	//plane.Draw(lights);
+	//cylinder.Draw(lights);
+	//sphere.Draw(lights);
+	plane.Draw(lights);
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -94,18 +94,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	D3DXCOLOR ambient = Colors::Black;
 	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, -1.0f),
 									   Colors::Black,
-									   Colors::Blue,
+									   Colors::Black,
 									   1.0f );
 	PointLight pointLight( D3DXVECTOR3(8.0f, -2.0f, 0.0f),
-						   Colors::Red,
+						   Colors::Black,
 						   Colors::Black,
 						   1.0f, 0.00f, 0.0f );
-	SpotLight spotLight( D3DXVECTOR3(-20.0f, 0.0f, 0.0f),
+	SpotLight spotLight( D3DXVECTOR3(20.0f, 0.0f, 0.0f),
 						 Colors::Green,
 						 Colors::Black,
 						 1.0f, 0.0f, 0.000f,
 						 6*D3DX_PI/64, 16*D3DX_PI/64,
-						 D3DXVECTOR3(1.0f, 0.0f, 0.0f) );
+						 D3DXVECTOR3(-1.0f, 0.0f, 0.0f) );
 
 	Lights lights(ambient, directionalLight, pointLight, spotLight);
 	lights.SetEye( spectatorCoords.GetCartesianCoords() );

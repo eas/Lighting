@@ -133,13 +133,10 @@ add r0, r0, c65
 
 	;must change attenuation if position is between inner and outter angles
 	dp3 r6, c89, r9;	(direct, spot_direct)
-	sge r2, r6, c88.zzzz	; phi < innerAngle
-	slt r3, r6, c88.zzzz	; phi > innerAngle
-	sge r4, r6, c88.wwww	; phi < outerAngle
-	mul r3, r3, r4			; innerAngle < phi < outerAngle
 	mad r4, r6, c88.yyyy, c88.xxxx
-	mad r2, r4, r3, r2
-	mul r11, r2, r11
+	max r4, r4, c100
+	min r4, r4, c101
+	mul r11, r4, r11
 
 	dp3 r2, -r9, r7	;(-light_direct, n)
 
