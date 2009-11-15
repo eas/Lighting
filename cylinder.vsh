@@ -59,6 +59,7 @@ add r0, r0, c65
 		; c72	direct
 		; c73	diffuse
 		; c74	specular
+		; c75	isActive
 
 	dp3 r2, -c72, r7	;(-direct, n) = cos(theta), can't change
 
@@ -79,6 +80,8 @@ add r0, r0, c65
 
 	mul r4, r4, c67
 	mad r3, r4, c74, r3	; specular + diffuse
+	
+	mul r3, r3, c75		; isActive
 
 	sge r4, r2, c100	; 0 if we can't light this vertex
 	mad r0, r4, r3, r0	; r0+=directional
@@ -90,6 +93,7 @@ add r0, r0, c65
 		; c77	diffuse
 		; c78	specular
 		; c79	attenuation
+		; c80	isActive
 	add r9, r10, -c76 ; light_direct
 
 	dp3 r3, r9, r9 ; distance^2
@@ -121,6 +125,8 @@ add r0, r0, c65
 	mad r3, r4, c78, r3
 	mul r3, r3, r11		; attenuation
 	
+	mul r3, r3, c80		; isActive
+	
 	sge r4, r2, c100	; 0 if we can't light this vertex
 	mad r0, r4, r3, r0	; r0+=directional
 	
@@ -134,6 +140,7 @@ add r0, r0, c65
 	; c87	attenuation
 	; c88	angles
 	; c89	direct
+	; c90	isActive
 	add r9, r10, -c84 ; light_direct
 
 	dp3 r3, r9, r9 ; distance^2
@@ -170,6 +177,8 @@ add r0, r0, c65
 	mul r4, r4, c67
 	mad r3, r4, c86, r3
 	mul r3, r3, r11		; attenuation
+	
+	mul r3, r3, c90		; isActive
 	
 	sge r4, r2, c100	; 0 if we can't light this vertex
 	mad r0, r4, r3, r0	; r0+=directional

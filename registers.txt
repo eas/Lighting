@@ -16,21 +16,24 @@ c63 - material
 	c67 - specular
 	
 Directional
-	c72 - c74
+	c72 - c75
 		c72 - direct
 		c73 - diffuse
 		c74 - specular
+		c75 - isActive
 Point
 	c76 - c80
-		c76	position
-		c77	diffuse
-		c78	specular
-		c79	attenuation
+		c76 - position
+		c77 - diffuse
+		c78	- specular
+		c79	- attenuation
+		c80 - isActive
 Spot
 	c84 - c90
-	c84	position
-	c85	diffuse
-	c86	specular
-	c87	attenuation
-	c88	angles
-	c89	direc
+		c84	- position
+		c85	- diffuse
+		c86	- specular
+		c87	- attenuation
+		c88	- angles
+		c89	- direct
+		c90 - isActive

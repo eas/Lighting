@@ -115,6 +115,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			case 'W':
 				spectatorCoords->DecR();
 				break;
+			case '1':
+				scene->ChangeDirectional();
+				break;
+			case '2':
+				scene->ChangePoint();
+				break;
+			case '3':
+				scene->ChangeSpot();
+				break;
 			default:
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}

@@ -12,6 +12,10 @@ public:
 	void SetProjectiveMatrix( const D3DXMATRIX& projectiveMatrix );
 	void SetEye( const D3DXVECTOR3& eye );
 	void Draw();
+
+	void ChangeDirectional();
+	void ChangePoint();
+	void ChangeSpot();
 private:
 	Scene(const Scene&);
 	Scene& operator=(const Scene&);

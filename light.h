@@ -24,16 +24,17 @@ class DirectionalLight
 {
 public:
 	DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse,
-					  const D3DXCOLOR& specular, float exp );
+					  const D3DXCOLOR& specular );
 
 	void Set(D3D::Shader& shader) const;
+	void ChangeState();
 private:
 	D3DXVECTOR4 direct_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
-	D3DXVECTOR4 specularConst_;
+	bool isActive_;
 
-	static const unsigned nVectors = 4;
+	static const unsigned nVectors = 3;
 	static const unsigned startRegister = 72;
 };
 
@@ -43,12 +44,14 @@ public:
 	PointLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
 				float a, float b, float c );
 	void Set(D3D::Shader& shader) const;
+	void ChangeState();
 
 private:
 	D3DXVECTOR4 position_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
+	bool isActive_;
 
 	static const unsigned nVectors = 4;
 	static const unsigned startRegister = 76;
@@ -60,6 +63,7 @@ public:
 			   float a, float b, float c, float innerAngle, float outerAngle,
 			   const D3DXVECTOR3& direct );
 	void Set(D3D::Shader& shader) const;
+	void ChangeState();
 
 private:
 	D3DXVECTOR4 position_;
@@ -68,6 +72,7 @@ private:
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
 	D3DXVECTOR4 angles_;
 	D3DXVECTOR4 direct_;
+	bool isActive_;
 
 	static const unsigned nVectors = 6;
 	static const unsigned startRegister = 84;
@@ -81,6 +86,10 @@ public:
 		   const PointLight& pointLight, const SpotLight& spotLight);
 	void SetLights(D3D::Shader& shader) const;
 	void SetEye(const D3DXVECTOR3& eye);
+	
+	void ChangeDirectional();
+	void ChangePoint();
+	void ChangeSpot();
 private:
 	Lights(const Lights&);
 	Lights& operator=(const Lights&);

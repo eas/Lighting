@@ -16,9 +16,9 @@ namespace
 
 		const Material material( Colors::Black,
 								 Colors::Black,
-								 Colors::Black,
-								 Colors::Black,
-								 1.0f );
+								 Colors::White,
+								 Colors::White,
+								 5.0f );
 		const D3DXMATRIX positionMatrix = TranslationMatrix(0, -Height/2, 0);
 	}
 
@@ -30,9 +30,9 @@ namespace
 
 		const Material material( Colors::Black,
 								 Colors::Black,
-								 Colors::Black,
-								 Colors::Black,
-								 1.0f );
+								 Colors::White,
+								 Colors::White,
+								 5.0f );
 
 		const D3DXMATRIX positionMatrix = TranslationMatrix( -2*Radius - 2*Radius, 0.0f, 0.0f );
 	}
@@ -41,27 +41,26 @@ namespace
 	{
 		const Material material( Colors::Black,
 								 Colors::Black,
-								 Colors::Black,
-								 Colors::Black,
-								 1.0f );
+								 Colors::White,
+								 Colors::White,
+								 5.0f );
 	}
 
 	namespace LightingConstants
 	{
-		const DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, -1.0f),
-												 Colors::Black, 
-												 Colors::Black,
-												 1.0f );
-		const PointLight pointLight( D3DXVECTOR3(8.0f, -2.0f, 0.0f),
-									 Colors::Black,
-									 Colors::Black,
+		const DirectionalLight directionalLight( D3DXVECTOR3(0.0f, -1.0f, 0.0f),
+												 Colors::Red / 3.0f, 
+												 Colors::Red / 3.0f );
+		const PointLight pointLight( D3DXVECTOR3(-8.0f, -6.0f, -2.0f),
+									 Colors::Green / 3.0f,
+									 Colors::Green / 3.0f,
 									 1.0f, 0.00f, 0.0f );
-		const SpotLight spotLight( D3DXVECTOR3(20.0f, 0.0f, 0.0f),
-								   Colors::Green,
-								   Colors::Black,
+		const SpotLight spotLight( D3DXVECTOR3(12.0f, -5.0f, 0.0f),
+								   Colors::Blue / 3.0f,
+								   Colors::Blue / 3.0f,
 								   1.0f, 0.0f, 0.000f,
 								   6*D3DX_PI/64, 16*D3DX_PI/64,
-								   D3DXVECTOR3(-1.0f, 0.0f, 0.0f) );
+								   D3DXVECTOR3(-12.0f, 5.0f, 0.0f) );
 		
 		const D3DXCOLOR ambient = Colors::Black;
 	}
@@ -113,5 +112,17 @@ void Scene::Draw()
 {
 	cylinder_.Draw(lights_);
 	sphere_.Draw(lights_);
-	plane_.Draw(lights_);
+	//plane_.Draw(lights_);
+}
+void Scene::ChangeDirectional()
+{
+	lights_.ChangeDirectional();	
+}
+void Scene::ChangePoint()
+{
+	lights_.ChangePoint();	
+}
+void Scene::ChangeSpot()
+{
+	lights_.ChangeSpot();	
 }

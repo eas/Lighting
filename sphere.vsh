@@ -79,6 +79,8 @@ add r0, r0, c65
 
 	mul r4, r4, c67
 	mad r3, r4, c74, r3	; specular + diffuse
+	
+	mul r3, r3, c75		; isActive
 
 	sge r4, r2, c100	; 0 if we can't light this vertex
 	mad r0, r4, r3, r0	; r0+=directional
@@ -120,6 +122,8 @@ add r0, r0, c65
 	mul r4, r4, c67
 	mad r3, r4, c78, r3
 	mul r3, r3, r11		; attenuation
+	
+	mul r3, r3, c80		; isActive
 	
 	sge r4, r2, c100	; 0 if we can't light this vertex
 	mad r0, r4, r3, r0	; r0+=directional
@@ -170,6 +174,8 @@ add r0, r0, c65
 	mul r4, r4, c67
 	mad r3, r4, c86, r3
 	mul r3, r3, r11		; attenuation
+	
+	mul r3, r3, c90		; isActive
 	
 	sge r4, r2, c100	; 0 if we can't light this vertex
 	mad r0, r4, r3, r0	; r0+=directional

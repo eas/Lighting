@@ -28,27 +28,51 @@ void Material::SetMaterial(D3D::Shader &shader) const
 
 
 
-DirectionalLight::DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular, float exp )
-	:direct_(direct, 0), diffuse_(diffuse), specular_(specular), specularConst_(exp, exp, exp, exp)
+DirectionalLight::DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular )
+	:direct_(direct, 0), diffuse_(diffuse), specular_(specular), isActive_(true)
 {
 	D3DXVec4Normalize(&direct_, &direct_);
 }
 void DirectionalLight::Set(D3D::Shader &shader) const
 {
 	shader.SetConstantF( startRegister, direct_, nVectors );
-}
 
+	if( isActive_ )
+	{
+		shader.SetConstantF( startRegister+nVectors, 1.0f );
+	}
+	else
+	{
+		shader.SetConstantF( startRegister+nVectors, 0.0f );
+	}
+}
+void DirectionalLight::ChangeState()
+{
+	isActive_ = !isActive_;
+}
 
 
 PointLight::PointLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
 						float a, float b, float c )
 	:position_(position, 0.0f), diffuse_(diffuse), specular_(specular),
-	 attenuation_(a, b, c, 0.0f)
+	 attenuation_(a, b, c, 0.0f), isActive_(true)
 {
 }
 void PointLight::Set(D3D::Shader &shader) const
 {
 	shader.SetConstantF( startRegister, position_, nVectors );
+	if( isActive_ )
+	{
+		shader.SetConstantF( startRegister+nVectors, 1.0f );
+	}
+	else
+	{
+		shader.SetConstantF( startRegister+nVectors, 0.0f );
+	}
+}
+void PointLight::ChangeState()
+{
+	isActive_ = !isActive_;
 }
 
 
@@ -58,7 +82,8 @@ SpotLight::SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, con
 					  const D3DXVECTOR3& direct )
 	:position_(position, 0.0f), diffuse_(diffuse), specular_(specular),
 	 attenuation_(a, b, c, 0.0f),
-	 direct_(direct, 0)
+	 direct_(direct, 0),
+	 isActive_(true)
 {
 	assert( innerAngle < outerAngle );
 	assert( outerAngle < D3DX_PI / 2 );
@@ -72,8 +97,19 @@ SpotLight::SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, con
 void SpotLight::Set(D3D::Shader &shader) const
 {
 	shader.SetConstantF( startRegister, position_, nVectors );
+	if( isActive_ )
+	{
+		shader.SetConstantF( startRegister+nVectors, 1.0f );
+	}
+	else
+	{
+		shader.SetConstantF( startRegister+nVectors, 0.0f );
+	}
 }
-
+void SpotLight::ChangeState()
+{
+	isActive_ = !isActive_;
+}
 
 
 Lights::Lights(const D3DXCOLOR& ambient, const DirectionalLight& directionalLight,
@@ -96,5 +132,16 @@ void Lights::SetEye(const D3DXVECTOR3 &eye)
 	eye_ = D3DXVECTOR4( eye, 0 );
 }
 
-
+void Lights::ChangeDirectional()
+{
+	directionalLight_.ChangeState();
+}
+void Lights::ChangePoint()
+{
+	pointLight_.ChangeState();
+}
+void Lights::ChangeSpot()
+{
+	spotLight_.ChangeState();
+}
 
