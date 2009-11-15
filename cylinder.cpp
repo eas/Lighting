@@ -68,9 +68,7 @@ void InitVertices(	Vertices& vertices, Indices& indices,
 
 Cylinder::Cylinder(unsigned int nPointsPerCircle, unsigned int nPointsPerGeneratrix, 
 				   float height, float Radius, D3D::GraphicDevice &device, float freq, float maxAngle,
-				   D3DXCOLOR ambient, D3DXCOLOR emissive,
-				   D3DXCOLOR diffuse, D3DXCOLOR specular,
-				   float specularExp)
+				   const Material& material)
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
@@ -78,7 +76,7 @@ Cylinder::Cylinder(unsigned int nPointsPerCircle, unsigned int nPointsPerGenerat
 	  shader_(device, L"cylinder.vsh"),
 	  freq_(freq),
 	  maxAngle_(maxAngle),
-	  material_(ambient, emissive, diffuse, specular, specularExp)
+	  material_(material)
 {
 	Vertices vertices;
 	Indices indices;

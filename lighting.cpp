@@ -6,10 +6,7 @@
 #include "colors.h"
 #include "matrices.h"
 
-#include "cylinder.h"
-#include "sphere.h"
-#include "light.h"
-#include "plane.h"
+#include "scene.h"
 
 #ifndef NDEBUG
 	#define new new( _CLIENT_BLOCK, __FILE__, __LINE__)
@@ -18,31 +15,30 @@
 const float FrontClippingPlane = 0.5f;
 const float BackClippingPlane = 1.0e13f;
 
-const unsigned nPointsPerCircle = 32;
-const unsigned nPointsPerGeneratrix = 16;
-const float Height = 13.0f;
-const float Radius = 4.0f;
-const float CylinderFreq = 1.00f;
-const float MaxAngle = D3DX_PI / 4;
-
-const float SphereRadius = 8.0f;
-const unsigned TesselationLevel = 5;
-const float SphereFreq = 1.0f;
-
-const float AngleStep = D3DX_PI / 8;
 
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-void Render(D3D::GraphicDevice& device, Helper::SpectatorCoords& ,
-			Cylinder& cylinder, Sphere& sphere, const Lights& lights, Plane& plane)
+void Render(D3D::GraphicDevice& device,	Scene& scene)
 {
-	cylinder; plane; sphere;
-
 	D3D::GraphicDevice::DC dc( device, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, Colors::Gray, 1.0f, 0 );
-	//cylinder.Draw(lights);
-	//sphere.Draw(lights);
-	plane.Draw(lights);
+	scene.Draw();
 }
-
+void MessageLoop( D3D::GraphicDevice& graphicDevice, Scene& scene )
+{
+	MSG msg;
+	ZeroMemory(&msg, sizeof(msg));
+    while( msg.message != WM_QUIT )
+    {
+        if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
+        {
+            TranslateMessage( &msg );
+            DispatchMessage( &msg );
+        }
+        else
+		{
+			Render(graphicDevice, scene);
+		}
+    }
+}
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE,
                      LPTSTR,
@@ -50,7 +46,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
 { // code block
 	Helper::Window mainWindow(	hInstance, nCmdShow, &WndProc,
-								L"Lighting", L"lighting", 5 );
+								L"Lighting", L"lighting", 2 );
 
 	D3DPRESENT_PARAMETERS params;
 		ZeroMemory( &params, sizeof( params ) );
@@ -68,69 +64,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	Helper::SpectatorCoords spectatorCoords( 40.0f, D3DX_PI / 2, -0*D3DX_PI / 2 );
 
-	D3DXMATRIX viewMatrix = ViewMatrix( spectatorCoords.GetCartesianCoords(),
-										D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-										D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-	D3DXMATRIX projectiveMatrix = ProjectiveMatrix( FrontClippingPlane, BackClippingPlane );
-
-	Cylinder cylinder(nPointsPerCircle, nPointsPerGeneratrix, Height, Radius, graphicDevice, CylinderFreq, MaxAngle,
-					  Colors::White, Colors::Black, Colors::White, Colors::White, 1.0f);
-	cylinder.SetPositionMatrix( TranslationMatrix(0, -Height/2, 0) );
-	cylinder.SetViewMatrix( viewMatrix );
-	cylinder.SetProjectiveMatrix( projectiveMatrix );
-
-	Plane plane( graphicDevice,
-				 Colors::Black, Colors::Black, Colors::White, Colors::White,
-				 1.0f );
-	plane.SetViewMatrix( viewMatrix );
-	plane.SetProjectiveMatrix( projectiveMatrix );
-	
-	Sphere sphere( SphereRadius, TesselationLevel, graphicDevice, SphereFreq,
-				   Colors::White, Colors::Black, Colors::White, Colors::White, 1.0f );
-	sphere.SetPositionMatrix( TranslationMatrix( -2*SphereRadius - 2*Radius, 0.0f, 0.0f ) );
-	sphere.SetViewMatrix( viewMatrix );
-	sphere.SetProjectiveMatrix( projectiveMatrix );
-
-	D3DXCOLOR ambient = Colors::Black;
-	DirectionalLight directionalLight( D3DXVECTOR3(0.0f, 0.0f, -1.0f),
-									   Colors::Black,
-									   Colors::Black,
-									   1.0f );
-	PointLight pointLight( D3DXVECTOR3(8.0f, -2.0f, 0.0f),
-						   Colors::Black,
-						   Colors::Black,
-						   1.0f, 0.00f, 0.0f );
-	SpotLight spotLight( D3DXVECTOR3(20.0f, 0.0f, 0.0f),
-						 Colors::Green,
-						 Colors::Black,
-						 1.0f, 0.0f, 0.000f,
-						 6*D3DX_PI/64, 16*D3DX_PI/64,
-						 D3DXVECTOR3(-1.0f, 0.0f, 0.0f) );
-
-	Lights lights(ambient, directionalLight, pointLight, spotLight);
-	lights.SetEye( spectatorCoords.GetCartesianCoords() );
+	Scene scene(graphicDevice);
+	scene.SetEye( spectatorCoords.GetCartesianCoords() );
+	scene.SetProjectiveMatrix( ProjectiveMatrix( FrontClippingPlane, BackClippingPlane ) );
 
 	SetWindowLong(mainWindow.GetHWND(), 0			  , reinterpret_cast<LONG>(&spectatorCoords));
-	SetWindowLong(mainWindow.GetHWND(), 1*sizeof(LONG), reinterpret_cast<LONG>(&cylinder));
-	SetWindowLong(mainWindow.GetHWND(), 2*sizeof(LONG), reinterpret_cast<LONG>(&lights));
-	SetWindowLong(mainWindow.GetHWND(), 3*sizeof(LONG), reinterpret_cast<LONG>(&sphere));
-	SetWindowLong(mainWindow.GetHWND(), 4*sizeof(LONG), reinterpret_cast<LONG>(&plane));
+	SetWindowLong(mainWindow.GetHWND(), 1*sizeof(LONG), reinterpret_cast<LONG>(&scene));
 
-	MSG msg;
+	MessageLoop( graphicDevice, scene );
 
-	ZeroMemory(&msg, sizeof(msg));
-    while( msg.message != WM_QUIT )
-    {
-        if( PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) )
-        {
-            TranslateMessage( &msg );
-            DispatchMessage( &msg );
-        }
-        else
-		{
-			Render(graphicDevice, spectatorCoords, cylinder, sphere, lights, plane);
-		}
-    }
 } // code block
 
 	_CrtDumpMemoryLeaks();
@@ -145,62 +87,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_KEYDOWN:
 		{
-			Helper::SpectatorCoords* pSpectatorCoords = NULL;
-			Cylinder* cylinder = NULL;
-			Lights* lights = NULL;
-			Plane* plane = NULL;
-			Sphere* sphere = NULL;
-			pSpectatorCoords = reinterpret_cast<Helper::SpectatorCoords*>(
+			Scene* scene = NULL;
+			Helper::SpectatorCoords* spectatorCoords = NULL;
+			spectatorCoords = reinterpret_cast<Helper::SpectatorCoords*>(
 												GetWindowLong(hWnd, 0));
-			cylinder = reinterpret_cast<Cylinder*>( GetWindowLong(hWnd,sizeof(LONG)) );
-			lights = reinterpret_cast<Lights*>( GetWindowLong(hWnd, 2*sizeof(LONG)) );
-			sphere = reinterpret_cast<Sphere*>( GetWindowLong(hWnd, 3*sizeof(LONG)) );
-			plane = reinterpret_cast<Plane*>( GetWindowLong(hWnd, 4*sizeof(LONG)) );
+			scene = reinterpret_cast<Scene*>( GetWindowLong(hWnd,sizeof(LONG)) );
 
 			switch(wParam)
 			{
 			case VK_UP:
-				pSpectatorCoords->DecTheta();
+				spectatorCoords->DecTheta();
 				break;
 			case VK_DOWN:
-				pSpectatorCoords->IncTheta();
+				spectatorCoords->IncTheta();
 				break;
 			case VK_RIGHT:
-				pSpectatorCoords->IncPhi();
+				spectatorCoords->IncPhi();
 				break;
 			case VK_LEFT:
-				pSpectatorCoords->DecPhi();
+				spectatorCoords->DecPhi();
 				break;
 			case VK_NEXT:
 			case 'S':
-				pSpectatorCoords->IncR();
+				spectatorCoords->IncR();
 				break;
 			case VK_PRIOR:
 			case 'W':
-				pSpectatorCoords->DecR();
-				break;
-			case 'T':
-				cylinder->SetPositionMatrix( cylinder->GetPostionMatrix() * RotateYMatrix( AngleStep ) );
-				break;
-			case 'G':
-				cylinder->SetPositionMatrix( cylinder->GetPostionMatrix() * RotateYMatrix( -AngleStep ) );
-				break;
-			case 'Y':
-				sphere->SetPositionMatrix( sphere->GetPostionMatrix() * RotateYMatrix( AngleStep ) );
-				break;
-			case 'H':
-				sphere->SetPositionMatrix( sphere->GetPostionMatrix() * RotateYMatrix( -AngleStep ) );
+				spectatorCoords->DecR();
 				break;
 			default:
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
-			D3DXMATRIX viewMatrix = ViewMatrix( pSpectatorCoords->GetCartesianCoords(),
-												 D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-												 D3DXVECTOR3(0.0f, 1.0f, 0.0f)) ;
-			cylinder->SetViewMatrix( viewMatrix );
-			sphere->SetViewMatrix( viewMatrix );
-			plane->SetViewMatrix( viewMatrix );
-			lights->SetEye( pSpectatorCoords->GetCartesianCoords() );
+			scene->SetEye( spectatorCoords->GetCartesianCoords() );
 
 			break;
 		}

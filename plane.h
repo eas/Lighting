@@ -13,9 +13,7 @@ public:
 	struct Vertex;
 
 	Plane( D3D::GraphicDevice& device,
-		   D3DXCOLOR ambient, D3DXCOLOR emissive,
-		   D3DXCOLOR diffuse, D3DXCOLOR specular,
-		   float specularExp );
+		   const Material& material );
 	void Draw(const Lights& lights);
 	void SetViewMatrix(const D3DXMATRIX& viewMatrix);
 	void SetProjectiveMatrix(const D3DXMATRIX& projectionMatrix);

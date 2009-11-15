@@ -31,9 +31,7 @@ Vertex SumWithWeight( const Vertex &v1, const Vertex &v2, float weight );
 
 
 Sphere::Sphere( float radius, unsigned tesselationLevel, D3D::GraphicDevice device, float freq,
-			    D3DXCOLOR ambient, D3DXCOLOR emissive,
-				D3DXCOLOR diffuse, D3DXCOLOR specular,
-				float specularExp )
+			    const Material& material )
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
@@ -42,7 +40,7 @@ Sphere::Sphere( float radius, unsigned tesselationLevel, D3D::GraphicDevice devi
 	  radius_(radius),
 	  tesselationLevel_(tesselationLevel),
 	  freq_(freq),
-	  material_( ambient, emissive, diffuse, specular, specularExp )
+	  material_(material)
 {
 	Vertices vertices;
 	Indices indices;

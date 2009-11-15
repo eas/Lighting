@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\scene.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -208,6 +212,10 @@
 			>
 			<File
 				RelativePath=".\lighting.h"
+				>
+			</File>
+			<File
+				RelativePath=".\scene.h"
 				>
 			</File>
 			<File

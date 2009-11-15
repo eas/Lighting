@@ -60,15 +60,13 @@ void InitVertices( Vertices& vertices, Indices& indices )
 	}
 }
 Plane::Plane( D3D::GraphicDevice &device,
-			  D3DXCOLOR ambient, D3DXCOLOR emissive,
-			  D3DXCOLOR diffuse, D3DXCOLOR specular,
-			  float specularExp)
+			  const Material& material )
 	: device_(device),
 	  vertexDeclaration_(device, DefaultVertexDeclaration),
 	  vertexBuffer_(device),
 	  indexBuffer_(device),
 	  shader_(device, L"plane.vsh"),
-	  material_(ambient, emissive, diffuse, specular, specularExp)
+	  material_(material)
 {
 	Vertices vertices;
 	Indices indices;

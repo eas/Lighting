@@ -1,92 +1,76 @@
 #pragma once
 #include "graphics.h"
+#include <vector>
 
 class Material
 {
 public:
 	Material( D3DXCOLOR ambient, D3DXCOLOR emissive,
-			  D3DXCOLOR diffuse, D3DXCOLOR specular, float specularExp = 1.0f )
-		  : ambient(ambient),
-		    emissive(emissive),
-			diffuse(diffuse),
-			specular(specular),
-			specularExp(specularExp)
-	{
-	}
+			  D3DXCOLOR diffuse, D3DXCOLOR specular, float specularExp );
+	Material( D3DXCOLOR colors[], float specularExp );
+
 	void SetMaterial(D3D::Shader& shader) const;
 
+	enum Colors{ ambient, emissive, diffuse, specular };
 private:
-	D3DXCOLOR ambient;
-	D3DXCOLOR emissive;
-	D3DXCOLOR diffuse;
-	D3DXCOLOR specular;
-	float specularExp;
+	float specularExp_;
+	D3DXCOLOR ambient_;
+	D3DXCOLOR emissive_;
+	D3DXCOLOR diffuse_;
+	D3DXCOLOR specular_;
 };
 
-struct DirectionalLight
+class DirectionalLight
 {
-	DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular, float exp )
-		:direct_(direct, 0), diffuse_(diffuse), specular_(specular), specularConst_(exp, exp, exp, exp)
-	{
-		D3DXVec4Normalize(&direct_, &direct_);
-	}
+public:
+	DirectionalLight( const D3DXVECTOR3& direct, const D3DXCOLOR& diffuse,
+					  const D3DXCOLOR& specular, float exp );
 
+	void Set(D3D::Shader& shader) const;
+private:
 	D3DXVECTOR4 direct_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
 	D3DXVECTOR4 specularConst_;
-	operator float*()
-	{
-		return direct_;
-	}
-	operator const float*() const
-	{
-		return direct_;
-	}
 
 	static const unsigned nVectors = 4;
+	static const unsigned startRegister = 72;
 };
-struct PointLight
+
+class PointLight
 {
+public:
 	PointLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
 				float a, float b, float c );
+	void Set(D3D::Shader& shader) const;
+
+private:
 	D3DXVECTOR4 position_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
-	operator float*()
-	{
-		return position_;
-	}
-	operator const float*() const
-	{
-		return position_;
-	}
 
 	static const unsigned nVectors = 4;
+	static const unsigned startRegister = 76;
 };
-struct SpotLight
+class SpotLight
 {
+public:
 	SpotLight( const D3DXVECTOR3& position, const D3DXCOLOR& diffuse, const D3DXCOLOR& specular,
 			   float a, float b, float c, float innerAngle, float outerAngle,
 			   const D3DXVECTOR3& direct );
+	void Set(D3D::Shader& shader) const;
 
+private:
 	D3DXVECTOR4 position_;
 	D3DXCOLOR diffuse_;
 	D3DXCOLOR specular_;
 	D3DXVECTOR4 attenuation_; // (a,b,c,0) 1/(a+b*d+c*d^2)
 	D3DXVECTOR4 angles_;
 	D3DXVECTOR4 direct_;
-	operator float*()
-	{
-		return position_;
-	}
-	operator const float*() const
-	{
-		return position_;
-	}
 
 	static const unsigned nVectors = 6;
+	static const unsigned startRegister = 84;
 };
 
 
